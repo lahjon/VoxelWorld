@@ -14,11 +14,11 @@ public class VoxelManager : MonoBehaviour
     //public int Operation = 1;
     public ProceduralMesh proceduralMesh;
     public SelectionCube selectionCube;
-    public Vector3Int coord;
-    public Vector3Int coordOffset;
-    public Vector3Int latestAddedCoord;
+    public Vector3Int placementCoord;
+    Vector3Int? latestAddedCoord = null;
+    Vector3Int latestSelectedCoord;
     bool isDrawing;
-    Vector3Int currentCoord;
+    Vector3Int selectedCoord;
     public static Direction[] AllDirections = new Direction[6]{
                                                 Direction.XPos,
                                                 Direction.XNeg,
@@ -30,7 +30,7 @@ public class VoxelManager : MonoBehaviour
     public float3 color;
     void Start()
     {
-
+        //latestAddedCoord = null;
     }
 
     public void ButtonClear()
@@ -41,58 +41,85 @@ public class VoxelManager : MonoBehaviour
 
     void CreateMesh()
     {
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-
-        RaycastHit hit;
-        if (Physics.Raycast(ray, out hit))
-        {
-            Vector3 newPos = hit.point + hit.normal;
-
-            int yOffset = hit.normal == Vector3.up ? -1 : 0;
-            int zOffset = hit.normal == Vector3.forward ? -1 : 0;
-            int xOffset = hit.normal == Vector3.right ? -1 : 0;
-            
-            Vector3Int tempCoord = new Vector3Int(Mathf.FloorToInt(newPos.x) + xOffset, Mathf.FloorToInt(newPos.y) + yOffset, Mathf.FloorToInt(newPos.z) + zOffset);
-            AddVoxel(tempCoord);
-        }
-        else
-        {
-            AddVoxel(coord);
-        }
-
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.faces).ToArray());
     }
 
     void AddVoxel(Vector3Int coord)
     {
+        if (latestAddedCoord == selectedCoord)
+            return;
         if (!voxels.ContainsKey(coord))
         {
             latestAddedCoord = coord;
+            latestSelectedCoord = coord;
             voxels.Add(coord, new Voxel(GetAllNeighbours(coord), coord, color));
+            CreateMesh();
         }
     }
+
+    void AddVoxels(Vector3Int[] addVoxels)
+    {
+        for (int i = 0; i < addVoxels.Length; i++)
+        {
+            if (!voxels.ContainsKey(addVoxels[i]))
+            {
+                voxels.Add(addVoxels[i], new Voxel(GetAllNeighbours(addVoxels[i]), addVoxels[i], color));
+            }
+        }
+        if (addVoxels.Length > 0)
+        {
+            latestSelectedCoord = addVoxels[addVoxels.Length - 1];
+        }
+        CreateMesh();
+    }
+
     void RemoveVoxel(Vector3Int coord)
     {
-        voxels.Remove(coord);
+        if(voxels.Remove(coord))
+            CreateMesh();
+    }
+
+    Vector3Int[] DrawLine(Vector3Int c1, Vector3Int c2)
+    {
+        int n = DiagonalDistance(c1, c2);
+        Vector3Int[] voxels = new Vector3Int[n + 1];
+        for (int i = 0; i <= n; i++)
+        {
+            float t = n == 0 ? 0f : (float)i / n;
+            voxels[i] = (RoundCoord(Vector3.Lerp(c1, c2, t)));
+        }
+        return voxels;
+    }
+    int DiagonalDistance(Vector3Int c1, Vector3Int c2) => Mathf.Max(Mathf.Abs(c2.x - c1.x), Mathf.Abs(c2.y - c1.y), Mathf.Abs(c2.z - c1.z));
+    Vector3Int RoundCoord(Vector3 coord)
+    {
+        return new Vector3Int(Mathf.RoundToInt(coord.x), Mathf.RoundToInt(coord.y), Mathf.RoundToInt(coord.z));
     }
 
     void Update()
     {
         GetCoord();
 
-        if (Input.GetMouseButtonDown(0))
+        if (Input.GetMouseButton(0) && !Input.GetKey(KeyCode.LeftShift))
         {
-            isDrawing = true;
+            AddVoxel(placementCoord);
         }
-        if (Input.GetMouseButton(0) && currentCoord != coord)
+        if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
         {
-            currentCoord = coord;
-            CreateMesh();
+            if (latestSelectedCoord != null)
+            {
+                AddVoxels(DrawLine(latestSelectedCoord, placementCoord));
+            }
+        }
+        if (Input.GetMouseButtonDown(2))
+        {
+            RemoveVoxel(selectedCoord);
         }
         if (Input.GetMouseButtonUp(0))
         {
-            isDrawing = false;
+            latestAddedCoord = null;
         }
+        Debug.Log(selectedCoord);
     }
 
     (bool success, Voxel neighbour) GetNeighbour(Vector3Int coord, Direction direction)
@@ -116,7 +143,6 @@ public class VoxelManager : MonoBehaviour
 
         return neighbours.ToArray();
     }
-
     
 
     void GetCoord()
@@ -128,34 +154,33 @@ public class VoxelManager : MonoBehaviour
 
         if (Physics.Raycast(ray, out hit))
         {
-            Vector3 newPos = hit.point + hit.normal;
+            Vector3Int normal =  Vector3Int.FloorToInt(hit.normal);
+            Vector3Int offsetCoord = new Vector3Int(hit.normal == Vector3.right ? 1 : 0, hit.normal == Vector3.up ? 1 : 0, hit.normal == Vector3.forward ? 1 : 0);
+            Vector3Int selCoord = Vector3Int.FloorToInt(hit.point) - offsetCoord;
 
-            int yOffset = hit.normal == Vector3.up ? -1 : 0;
-            int zOffset = hit.normal == Vector3.forward ? -1 : 0;
-            int xOffset = hit.normal == Vector3.right ? -1 : 0;
-            
-            Vector3Int tempCoord = new Vector3Int(Mathf.FloorToInt(newPos.x) + xOffset, Mathf.FloorToInt(newPos.y) + yOffset, Mathf.FloorToInt(newPos.z) + zOffset);
-
-            Vector3Int selectedCoord = new Vector3Int(Mathf.FloorToInt(hit.point.x) + xOffset, Mathf.FloorToInt(hit.point.y) + yOffset, Mathf.FloorToInt(hit.point.z) + zOffset);
-
-            Debug.Log(selectedCoord);
-            Debug.Log(selectedCoord);
-
-            coord = tempCoord;
-            if (selectionCube.coord != coord)
+            if (hit.normal == Vector3.up || hit.normal == Vector3.down)
             {
-                selectionCube.MoveToCoord(coord, voxels.ContainsKey(coord));
+                selCoord.y = Mathf.RoundToInt(hit.point.y) - offsetCoord.y;
+            }
+            else if (hit.normal == Vector3.left || hit.normal == Vector3.right)
+            {
+                selCoord.x = Mathf.RoundToInt(hit.point.x) - offsetCoord.x;
+            }
+            else
+            {
+                selCoord.z = Mathf.RoundToInt(hit.point.z) - offsetCoord.z;
             }
             
+            placementCoord = selCoord + normal;
+            selectedCoord = selCoord;
         }
         else if (plane.Raycast(ray, out distance))
         {
             Vector3 pos = ray.GetPoint(distance);
-            coord = new Vector3Int(Mathf.FloorToInt(pos.x), gridLevel, Mathf.FloorToInt(pos.z));
-            if (selectionCube.coord != coord)
-            {
-                selectionCube.MoveToCoord(coord, voxels.ContainsKey(coord));
-            }
+            placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), gridLevel, Mathf.FloorToInt(pos.z));
+            selectedCoord = placementCoord;
         }
+
+        selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
     }
 }

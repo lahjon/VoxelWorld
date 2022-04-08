@@ -20,7 +20,8 @@ namespace Geometry {
 
 namespace Geometry.Streams {
 
-    public struct SingleStream : IMeshStreams {
+    public struct SingleStream : IMeshStreams 
+	{
 		public Mesh.MeshData MeshData {get;set;}
 
         [StructLayout(LayoutKind.Sequential)]

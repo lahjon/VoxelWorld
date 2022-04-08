@@ -13,10 +13,9 @@ namespace Geometry {
 
         [WriteOnly]
         S streams;
-        public void Execute (int i) => generator.Execute(i, streams);
-        public static JobHandle ScheduleParallel (Mesh mesh, Mesh.MeshData meshData, NativeArray<Face> input, JobHandle dependency) 
+        public void Execute(int i) => generator.Execute(i, streams);
+        public static JobHandle ScheduleParallel(Mesh mesh, Mesh.MeshData meshData, NativeArray<Face> input, JobHandle dependency) 
         {
-            
             MeshJob<G, S> job = new MeshJob<G, S>();
             job.generator.Faces = input;
             job.generator.FaceAmount = input.Length;

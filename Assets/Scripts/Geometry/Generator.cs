@@ -14,7 +14,7 @@ namespace Geometry {
 		int IndexCount { get; }
         int JobLength { get; }
 		NativeArray<Face> Faces {get;set;}
-		void Execute<S> (int i, S streams) where S : struct, IMeshStreams;
+		void Execute<S>(int i, S streams) where S : struct, IMeshStreams;
 	}
 }
 
@@ -29,27 +29,13 @@ namespace Geometry.Generators {
         NativeArray<Face> faces;
 		public Bounds Bounds => new Bounds(new Vector3(0.5f, 0.5f), new Vector3(1f, 1f));
         public NativeArray<Face> Faces { get => faces; set => faces = value; }
-        public void Execute<S> (int z, S streams) where S : struct, IMeshStreams 
+        public void Execute<S>(int z, S streams) where S : struct, IMeshStreams 
 		{
 			Vertex vertex = new Vertex();
-
 			int v0, v1, v2, v3 = 0;
 
 			for (int i = 0; i < FaceAmount; i++)
 			{
-				// if (Faces[i].color.x == 0 && Faces[i].color.y == 0 && Faces[i].color.z == 0 && Faces[i].color.w == 0)
-				// {
-				// 	vertex.color = Faces[i].direction.GetColor();
-				// 	vertex.tangent = Faces[i].direction.GetTangent();
-				// 	vertex.normal = Faces[i].direction.Normal();
-				// }
-				// else
-				// {
-				// 	vertex.color = Faces[i].color;
-				// 	vertex.tangent = Faces[i].tangent;
-				// 	vertex.normal = Faces[i].normal;			
-				// }
-
 				vertex.color = Faces[i].color;
 				vertex.tangent = Faces[i].direction.ToTangent();
 				vertex.normal = Faces[i].direction.ToNormal();

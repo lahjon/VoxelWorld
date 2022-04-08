@@ -8,8 +8,6 @@ namespace Geometry
     {
         public float3 x, y, z, w;
         public Direction direction;
-        // public float4 tangent;
-		// public float3 normal;
 		public float3 color;
         public Face(float3 x, float3 y, float3 z, float3 w, Direction direction, float3 color)
         {
@@ -18,8 +16,6 @@ namespace Geometry
             this.w = w;
             this.z = z;
             this.direction = direction;
-            // tangent = new float4(0f, 0f, 0f, 0f);
-			// normal = new float3(0f, 0f, 0f);
 			this.color = color;
         }
     }
