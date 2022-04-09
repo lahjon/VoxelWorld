@@ -53,6 +53,27 @@ public static class DirectionExtensions {
 		}
 	}
 
+	public static Direction Invert(this Direction direction)
+	{
+		switch (direction)
+		{
+			case Direction.XPos:
+				return Direction.XNeg;
+			case Direction.XNeg:
+				return Direction.XPos;
+			case Direction.YPos:
+				return Direction.YNeg;
+			case Direction.YNeg:
+				return Direction.YPos;
+			case Direction.ZPos:
+				return Direction.ZNeg;
+			case Direction.ZNeg:
+				return Direction.ZPos;
+			default:
+				return Direction.XNeg;
+		}
+	}
+
 	public static Vector3Int ToCoord(this Direction direction) {
 		switch (direction)
 		{

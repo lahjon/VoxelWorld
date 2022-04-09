@@ -30,7 +30,7 @@ public class VoxelManager : MonoBehaviour
     public float3 color;
     void Start()
     {
-        //latestAddedCoord = null;
+        
     }
 
     public void ButtonClear()
@@ -44,6 +44,18 @@ public class VoxelManager : MonoBehaviour
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.faces).ToArray());
     }
 
+    List<Face> GenerateFaces()
+    {
+        List<Face> faces = new List<Face>();
+        for (int i = 0; i < voxels.Count; i++)
+        {
+
+
+            
+        }
+        return faces;
+    }
+
     void AddVoxel(Vector3Int coord)
     {
         if (latestAddedCoord == selectedCoord)
@@ -52,7 +64,9 @@ public class VoxelManager : MonoBehaviour
         {
             latestAddedCoord = coord;
             latestSelectedCoord = coord;
-            voxels.Add(coord, new Voxel(GetAllNeighbours(coord), coord, color));
+            Voxel voxel = new Voxel(new List<Voxel>(), coord, color);
+            voxels.Add(coord, voxel);
+            voxel.Neighbours = GetAllNeighbours(coord, true);
             CreateMesh();
         }
     }
@@ -63,7 +77,9 @@ public class VoxelManager : MonoBehaviour
         {
             if (!voxels.ContainsKey(addVoxels[i]))
             {
-                voxels.Add(addVoxels[i], new Voxel(GetAllNeighbours(addVoxels[i]), addVoxels[i], color));
+                Voxel voxel = new Voxel(null, addVoxels[i], color);
+                voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
+                voxels.Add(addVoxels[i], voxel);
             }
         }
         if (addVoxels.Length > 0)
@@ -119,29 +135,45 @@ public class VoxelManager : MonoBehaviour
         {
             latestAddedCoord = null;
         }
-        Debug.Log(selectedCoord);
+        //Debug.Log(selectedCoord);
     }
 
-    (bool success, Voxel neighbour) GetNeighbour(Vector3Int coord, Direction direction)
+    public Voxel GetNeighbour(Vector3Int coord, Direction direction)
     {
         if (voxels.ContainsKey(coord + direction.ToCoord()) && voxels[coord + direction.ToCoord()] is Voxel voxel)
-            return (true, voxel);
+            return voxel;
         else
-            return (false, new Voxel());
+            return null;
     }   
-    Voxel[] GetAllNeighbours(Vector3Int coord)
+    List<Voxel> GetAllNeighbours(Vector3Int coord, bool add)
     {
-        (bool, Voxel) neighbour;
         List<Voxel> neighbours = new List<Voxel>();
 
         for (int i = 0; i < AllDirections.Length; i++)
         {
-            neighbour = GetNeighbour(coord, AllDirections[i]);
-            if (neighbour.Item1)
-                neighbours.Add(neighbour.Item2);
+            if (GetNeighbour(coord, AllDirections[i]) is Voxel voxel)
+            {
+                if (add)
+                {
+                    if (voxel.Neighbours == null)
+                    {
+                        voxel.Neighbours = new List<Voxel>();
+                    }
+                    voxel.Neighbours.Add(voxels[coord]);
+                    //Debug.Log("added " + voxels[coord]);
+                }
+                neighbours.Add(voxel);
+            }
         }   
 
-        return neighbours.ToArray();
+        //Debug.Log("Returning " + neighbours.Count);
+
+        return neighbours;
+    }
+
+    void ExtrudeByNormal(Voxel voxel, Direction direction)
+    {
+        
     }
     
 
