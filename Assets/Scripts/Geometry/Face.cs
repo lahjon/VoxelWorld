@@ -46,8 +46,8 @@ public struct DirectionStruct
 		Vector3Int.left,
 		Vector3Int.up,
 		Vector3Int.down,
-		Vector3Int.forward,
-		Vector3Int.back
+		Vector3Int.back,
+		Vector3Int.forward
 	};
 	public static readonly Direction[] Directions = new Direction[6]
 	{
@@ -77,7 +77,7 @@ public struct DirectionStruct
 		{
 			dirs[0] = Direction.YNeg;
 			dirs[1] = Direction.YPos;
-			dirs[3] = Direction.ZNeg;
+			dirs[2] = Direction.ZNeg;
 			dirs[3] = Direction.ZPos;
 		}
 		else if (Direction.YNeg == direction || Direction.YPos == direction)

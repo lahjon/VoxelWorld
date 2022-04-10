@@ -7,17 +7,7 @@ namespace Geometry {
 
     public class Voxel
     {
-        public List<Face> faces;
-        List<Voxel> _neighbours;
-        public List<Voxel> Neighbours
-        {
-            get => _neighbours;
-            set
-            {
-                _neighbours = value;
-                SetFaces();
-            }
-        }
+        public List<Voxel> Neighbours;
         public Vector3Int coord;
         public float3 color;
 
@@ -28,18 +18,18 @@ namespace Geometry {
             this.color = color;
         }
 
-        public void SetFaces()
+        public List<Face> GetFaces()
         {
-            faces = new List<Face>();
+            List<Face> faces = new List<Face>();
             for (int i = 0; i < VoxelManager.AllDirections.Length; i++)
             {
                 if (GetNeighbour(coord + VoxelManager.AllDirections[i].ToCoord()) is Voxel voxel)
                 {
-                    //Debug.Log("Remove Face");
                     continue;
                 }
                 faces.Add(VoxelManager.AllDirections[i].CreateFace(new float3(coord.x, coord.y, coord.z), color));
             }
+            return faces;
         }
 
         (bool, Direction) NeighbourDirection(Voxel voxel)
