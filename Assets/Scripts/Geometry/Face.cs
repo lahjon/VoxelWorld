@@ -31,9 +31,76 @@ public enum Direction
 	ZNeg
 }
 
+public enum GridAxis
+{
+	XZ,
+	YZ,
+	YX
+}
+
+public struct DirectionStruct
+{
+	public static readonly Vector3Int[] Normals = new Vector3Int[6]
+	{
+		Vector3Int.right,
+		Vector3Int.left,
+		Vector3Int.up,
+		Vector3Int.down,
+		Vector3Int.forward,
+		Vector3Int.back
+	};
+	public static readonly Direction[] Directions = new Direction[6]
+	{
+		Direction.XPos,
+		Direction.XNeg,
+		Direction.YPos,
+		Direction.YNeg,
+		Direction.ZPos,
+		Direction.ZNeg,
+	};
+	public static Direction NormalToDirection(Vector3Int normal)
+	{
+		for (int i = 0; i < Normals.Length; i++)
+		{
+			if (Normals[i] == normal)
+			{
+				return Directions[i];
+			}
+		}
+		return Direction.XPos;
+	}
+
+	public static Direction[] AvailableDirections(Direction direction)
+	{
+		Direction[] dirs = new Direction[4];
+		if (Direction.XNeg == direction || Direction.XPos == direction)
+		{
+			dirs[0] = Direction.YNeg;
+			dirs[1] = Direction.YPos;
+			dirs[3] = Direction.ZNeg;
+			dirs[3] = Direction.ZPos;
+		}
+		else if (Direction.YNeg == direction || Direction.YPos == direction)
+		{
+			dirs[0] = Direction.XPos;
+			dirs[1] = Direction.XNeg;
+			dirs[2] = Direction.ZNeg;
+			dirs[3] = Direction.ZPos;
+		}
+		else if (Direction.ZNeg == direction || Direction.ZPos == direction)
+		{
+			dirs[0] = Direction.XPos;
+			dirs[1] = Direction.XNeg;
+			dirs[2] = Direction.YNeg;
+			dirs[3] = Direction.YPos;
+		}
+		return dirs;
+	}
+}
+
 public static class DirectionExtensions {
 
-	public static float3 ToNormal(this Direction direction) {
+	public static float3 FloatToNormal(this Direction direction) {
 		switch (direction)
 		{
 			case Direction.XPos:
@@ -73,6 +140,7 @@ public static class DirectionExtensions {
 				return Direction.XNeg;
 		}
 	}
+
 
 	public static Vector3Int ToCoord(this Direction direction) {
 		switch (direction)

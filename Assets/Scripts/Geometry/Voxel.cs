@@ -28,24 +28,18 @@ namespace Geometry {
             this.color = color;
         }
 
-        void SetFaces()
+        public void SetFaces()
         {
             faces = new List<Face>();
             for (int i = 0; i < VoxelManager.AllDirections.Length; i++)
             {
                 if (GetNeighbour(coord + VoxelManager.AllDirections[i].ToCoord()) is Voxel voxel)
                 {
+                    //Debug.Log("Remove Face");
                     continue;
                 }
                 faces.Add(VoxelManager.AllDirections[i].CreateFace(new float3(coord.x, coord.y, coord.z), color));
             }
-            
-            // faces.Add(Direction.XPos.CreateFace(new float3(coord.x, coord.y, coord.z), color));
-            // faces.Add(Direction.XNeg.CreateFace(new float3(coord.x, coord.y, coord.z), color));
-            // faces.Add(Direction.YPos.CreateFace(new float3(coord.x, coord.y, coord.z), color));
-            // faces.Add(Direction.YNeg.CreateFace(new float3(coord.x, coord.y, coord.z), color));
-            // faces.Add(Direction.ZPos.CreateFace(new float3(coord.x, coord.y, coord.z), color));
-            // faces.Add(Direction.ZNeg.CreateFace(new float3(coord.x, coord.y, coord.z), color));
         }
 
         (bool, Direction) NeighbourDirection(Voxel voxel)

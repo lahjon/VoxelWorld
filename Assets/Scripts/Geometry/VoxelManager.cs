@@ -19,6 +19,7 @@ public class VoxelManager : MonoBehaviour
     Vector3Int latestSelectedCoord;
     bool isDrawing;
     Vector3Int selectedCoord;
+    Vector3Int placementNormal;
     public static Direction[] AllDirections = new Direction[6]{
                                                 Direction.XPos,
                                                 Direction.XNeg,
@@ -44,17 +45,17 @@ public class VoxelManager : MonoBehaviour
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.faces).ToArray());
     }
 
-    List<Face> GenerateFaces()
-    {
-        List<Face> faces = new List<Face>();
-        for (int i = 0; i < voxels.Count; i++)
-        {
+    // List<Face> GenerateFaces()
+    // {
+    //     List<Face> faces = new List<Face>();
+    //     for (int i = 0; i < voxels.Count; i++)
+    //     {
 
 
             
-        }
-        return faces;
-    }
+    //     }
+    //     return faces;
+    // }
 
     void AddVoxel(Vector3Int coord)
     {
@@ -77,9 +78,9 @@ public class VoxelManager : MonoBehaviour
         {
             if (!voxels.ContainsKey(addVoxels[i]))
             {
-                Voxel voxel = new Voxel(null, addVoxels[i], color);
-                voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
+                Voxel voxel = new Voxel(new List<Voxel>(), addVoxels[i], color);
                 voxels.Add(addVoxels[i], voxel);
+                voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
             }
         }
         if (addVoxels.Length > 0)
@@ -91,8 +92,17 @@ public class VoxelManager : MonoBehaviour
 
     void RemoveVoxel(Vector3Int coord)
     {
-        if(voxels.Remove(coord))
+        if(voxels.ContainsKey(coord) && voxels[coord] is Voxel voxel)
+        {
+            for (int i = 0; i < voxel.Neighbours.Count; i++)
+            {
+                voxel.Neighbours[i].Neighbours.Remove(voxel);
+                voxel.Neighbours[i].SetFaces();
+            }
+            voxels.Remove(coord);
+            voxel.SetFaces();
             CreateMesh();
+        }
     }
 
     Vector3Int[] DrawLine(Vector3Int c1, Vector3Int c2)
@@ -120,7 +130,14 @@ public class VoxelManager : MonoBehaviour
         {
             AddVoxel(placementCoord);
         }
-        if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
+        else if (Input.GetMouseButton(0) && Input.GetKey(KeyCode.LeftControl))
+        {
+            if (voxels.ContainsKey(placementCoord) && voxels[placementCoord] is Voxel voxel)
+            {
+                //ExtrudeByNormal(voxel, DirectionStruct.NormalToDirection(placementNormal));
+            }
+        }
+        else if (Input.GetMouseButtonDown(0))
         {
             if (latestSelectedCoord != null)
             {
@@ -145,6 +162,8 @@ public class VoxelManager : MonoBehaviour
         else
             return null;
     }   
+
+
     List<Voxel> GetAllNeighbours(Vector3Int coord, bool add)
     {
         List<Voxel> neighbours = new List<Voxel>();
@@ -155,25 +174,46 @@ public class VoxelManager : MonoBehaviour
             {
                 if (add)
                 {
-                    if (voxel.Neighbours == null)
-                    {
-                        voxel.Neighbours = new List<Voxel>();
-                    }
                     voxel.Neighbours.Add(voxels[coord]);
-                    //Debug.Log("added " + voxels[coord]);
                 }
                 neighbours.Add(voxel);
+                voxel.SetFaces();
             }
         }   
-
-        //Debug.Log("Returning " + neighbours.Count);
-
         return neighbours;
     }
 
-    void ExtrudeByNormal(Voxel voxel, Direction direction)
+    // void ExtrudeByNormal(Voxel voxel, Direction direction)
+    // {
+    //     HashSet<Voxel> extrudeVoxels = new HashSet<Voxel>();
+    //     extrudeVoxels.Add(voxel);
+    //     if (voxels.ContainsKey(voxel.coord))
+    //     {
+    //         for (int i = 0; i < voxel.Neighbours.Count; i++)
+    //         {
+                
+    //         }
+    //     }
+    // }
+
+    public Voxel GetNeighbourPlaneSnap(Vector3Int coord, Direction direction)
     {
-        
+        if (true)
+        {
+            if (true)
+            {
+                
+            }
+        }
+        if (voxels.ContainsKey(coord + direction.ToCoord()) && voxels[coord + direction.ToCoord()] is Voxel voxel)
+            return voxel;
+        else
+            return null;
+    }   
+    HashSet<Voxel> GetConnectedVoxelsByPlame(Voxel voxel, Direction dir)
+    {
+        HashSet<Voxel> allVoxels = new HashSet<Voxel>();
+        return allVoxels;
     }
     
 
@@ -203,6 +243,7 @@ public class VoxelManager : MonoBehaviour
                 selCoord.z = Mathf.RoundToInt(hit.point.z) - offsetCoord.z;
             }
             
+            placementNormal = normal;
             placementCoord = selCoord + normal;
             selectedCoord = selCoord;
         }
@@ -211,6 +252,7 @@ public class VoxelManager : MonoBehaviour
             Vector3 pos = ray.GetPoint(distance);
             placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), gridLevel, Mathf.FloorToInt(pos.z));
             selectedCoord = placementCoord;
+            placementNormal = Vector3Int.up;
         }
 
         selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));

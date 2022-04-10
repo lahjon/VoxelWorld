@@ -38,7 +38,7 @@ namespace Geometry.Generators {
 			{
 				vertex.color = Faces[i].color;
 				vertex.tangent = Faces[i].direction.ToTangent();
-				vertex.normal = Faces[i].direction.ToNormal();
+				vertex.normal = Faces[i].direction.FloatToNormal();
 
 				vertex.position = Faces[i].x;
 				v0 = i * 4;
