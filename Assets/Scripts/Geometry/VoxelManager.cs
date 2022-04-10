@@ -7,11 +7,9 @@ using Unity.Mathematics;
 using System.Linq;
 public class VoxelManager : MonoBehaviour
 {
-    //public List<Face> faces;
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
     public float voxelSize;
     public int gridLevel;
-    //public int Operation = 1;
     public ProceduralMesh proceduralMesh;
     public SelectionCube selectionCube;
     public Vector3Int placementCoord;
