@@ -4,117 +4,104 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
+using Unity.Mathematics;
+using System;
 
 public class ColorWheel : MonoBehaviour
 {
     public Image image;
-    public Button button;
     public RectTransform picker;
-    bool holding;
+    public VoxelManager voxelManager;
+    public ValuePicker valuePicker;
+    public bool Holding {get;set;}
     int height, width;
-
-    void Awake()
-    {
-        
-    }
-    
+    int size;
 
     void Start()
     {
-        int size = 512;
-        Texture2D texture = new Texture2D(128, 128, TextureFormat.ARGB32, false);
-
-        var circle = DrawCircle(128);
-        for (int i = 0; i < circle.Length; i++)
-        {
-            Debug.Log(circle[i]);
-            texture.SetPixel(i, i, circle[i]);
-        }
-        
-
-        texture.Apply();
-
-        Sprite mySprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
-        image.sprite = mySprite;
+        size = 250;
+        DrawCircle(size);
     }
 
     void Update()
     {
-        if (holding)
+        if (Holding)
         {
-            picker.position = Input.mousePosition;
+            SetPickerPosition();
         }
     }
 
     public void SetPickerPosition()
     {
-        Debug.Log(image.GetComponent<RectTransform>().anchoredPosition);
+        // get position from picker and translate to pixel position
         picker.position = Input.mousePosition;
-        Debug.Log(picker.localPosition.normalized);
+        Vector3Int pixelPos = Vector3Int.RoundToInt(new Vector3(
+                picker.localPosition.x.Remap(-size/2, size/2, 0, size), 
+                picker.localPosition.y.Remap(-size/2, size/2, 0, size), 
+                picker.localPosition.z.Remap(-size/2, size/2, 0, size))
+            );
+
+        // get pixel color value and set new color
+        valuePicker.GenerateImage(image.sprite.texture.GetPixel(pixelPos.x, pixelPos.y));
     }
 
-    public void StartHold()
+    void DrawCircle(int size)
     {
-        Debug.Log("Holding");
-        holding = true;
-    }
-    public void StopHold()
-    {
-        holding = false;
-        Debug.Log("Stop");
-    }
-
-    Color[] DrawCircle(int size)
-    {
-        Color[] row = new Color[size];
-        Color[] column = new Color[size];
-        float fSize = (float)size;
-        float radius = fSize / 2f;
-
-        for (int yIdx = 0; yIdx < size; yIdx++)
+        int radius = size / 2;
+        Texture2D texture = new Texture2D(size, size, TextureFormat.ARGB32, false);
+        Color emptyColor = new Color(0,0,0,0);
+        for (int x = -radius; x < radius; x++)
         {
-            float y = yIdx - radius;
-            for (int xIdx = 0; xIdx < size; xIdx++)
+            for (int y = -radius; y < radius; y++)
             {
-                float x = xIdx - radius;
-                float theta = Mathf.Atan2(x, y) - 3f * Mathf.PI / 2f;
-                if (theta < 0)
+                (float r, float deg) = XY2Polar(x, y);
+
+                // coords adjusted to polar coords
+                int adjustedX = x + radius;
+                int adjustedY = y + radius;
+
+                if (r > radius)
                 {
-                    theta += 2f * Mathf.PI;
+                    // if outside of circle, set transparent
+                    texture.SetPixel(adjustedX, adjustedY, emptyColor);
+                    continue;
                 }
-                float r = Mathf.Sqrt(x * x + y * y);
-                float hue = theta / (2f * Mathf.PI);
-                float sat = Mathf.Min((r / radius), 1f);
+
+                // remap degrees to 0-1 float range
+                float hue = deg.Remap(-180, 180, 0, 1);
+                // set saturation based on distance from center
+                float sat = r / radius;
+                // value always one in color wheel
                 float val = 1f;
-                row[xIdx] = Color.HSVToRGB(hue, sat, val);
-                row[xIdx].a = 1f;
+                
+                Color color = Color.HSVToRGB(hue, sat, val);
+                texture.SetPixel(adjustedX, adjustedY, color);
             }
-            //column[yIdx] = row[xIdx];
         }
-        return row;
+        
+        texture.Apply();
+        Sprite mySprite = Sprite.Create(texture, new Rect(0.0f, 0.0f, texture.width, texture.height), new Vector2(0.5f, 0.5f), 100.0f);
+        image.sprite = mySprite;
+
+        valuePicker.GenerateImage(Color.white);
     }
+
+    (float r, float deg) XY2Polar(int x, int y)
+    {
+        // distance from center to point
+        float r = Mathf.Sqrt(x*x + y*y);
+        // angle of point
+        float deg = Mathf.Atan2(y, x) * Mathf.Rad2Deg;
+        return (r, deg);
+    }
+
 }
 
-// BufferedImage.TYPE_INT_ARGB);
-//   int[] row = new int[SIZE];
-//   float size = (float) SIZE;
-//   float radius = size / 2f;
-
-//   for (int yidx = 0; yidx < SIZE; yidx++) {
-//     float y = yidx - size / 2f;
-//     for (int xidx = 0; xidx < SIZE; xidx++) {
-//       float x = xidx - size / 2f;
-//       double theta = Math.atan2(y, x) - 3d * Math.PI / 2d;
-//       if (theta < 0) {
-//         theta += 2d * Math.PI;
-//       }
-//       double r = Math.sqrt(x * x + y * y);
-//       float hue = (float) (theta / (2d * Math.PI));
-//       float sat = Math.min((float) (r / radius), 1f);
-//       float bri = 1f;
-//       row[xidx] = Color.HSBtoRGB(hue, sat, bri);
-//     }
-//     image.getRaster().setDataElements(0, yidx, SIZE, 1, row);
-//   }
-//   return image;
-// }
+public static class ExtensionMethods 
+{
+    public static float Remap (this float value, float from1, float to1, float from2, float to2) 
+    {
+        // remap range1 to range2, 1, 0, 2, 0, 10 = 5
+        return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
+    }
+}
