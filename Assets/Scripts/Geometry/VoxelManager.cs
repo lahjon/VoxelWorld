@@ -110,6 +110,23 @@ public class VoxelManager : MonoBehaviour
         }
         CreateMesh();
     }
+    public void AddVoxels(Vector3Int[] addVoxels, Color aColor)
+    {
+        for (int i = 0; i < addVoxels.Length; i++)
+        {
+            if (!voxels.ContainsKey(addVoxels[i]))
+            {
+                Voxel voxel = new Voxel(new List<Voxel>(), addVoxels[i], new float3(aColor.r, aColor.g, aColor.b));
+                voxels.Add(addVoxels[i], voxel);
+                voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
+            }
+        }
+        if (addVoxels.Length > 0)
+        {
+            latestSelectedCoord = addVoxels[addVoxels.Length - 1];
+        }
+        CreateMesh();
+    }
     public void RemoveVoxel(Vector3Int coord)
     {
         if(voxels.ContainsKey(coord) && voxels[coord] is Voxel voxel)

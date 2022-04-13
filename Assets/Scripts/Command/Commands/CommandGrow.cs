@@ -18,7 +18,7 @@ public class CommandGrow : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.AddVoxels(coords);
+        VoxelManager.instance.AddVoxels(coords, color);
     }
 
     public void Undo()

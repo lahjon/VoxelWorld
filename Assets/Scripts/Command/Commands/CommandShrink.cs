@@ -23,6 +23,6 @@ public class CommandShrink : ICommand
 
     public void Undo()
     {
-        VoxelManager.instance.AddVoxels(coords);
+        VoxelManager.instance.AddVoxels(coords, color);
     }
 }

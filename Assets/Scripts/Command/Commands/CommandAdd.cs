@@ -18,7 +18,7 @@ public class CommandAdd : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.AddVoxel(placementCoord);
+        VoxelManager.instance.AddVoxel(placementCoord, color);
     }
 
     public void Undo()
