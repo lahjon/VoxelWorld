@@ -10,7 +10,6 @@ namespace Geometry {
         public List<Voxel> Neighbours;
         public Vector3Int coord;
         public float3 color;
-
         public Voxel(List<Voxel> neighbours, Vector3Int coord, float3 color)
         {
             this.Neighbours = neighbours;
@@ -31,25 +30,10 @@ namespace Geometry {
             }
             return faces;
         }
-
-        (bool, Direction) NeighbourDirection(Voxel voxel)
-        {
-            for (int i = 0; i < VoxelManager.AllDirections.Length; i++)
-            {
-                if (VoxelManager.AllDirections[i].ToCoord() == coord - voxel.coord)
-                {
-                    return (true, VoxelManager.AllDirections[i]);
-                }
-                
-            }
-            // FIX
-            return (false, Direction.XPos);
-        }
-
         public Voxel GetNeighbour(Vector3Int coord)
         {
             return Neighbours.FirstOrDefault(x => x.coord == coord);
-        }   
+        }
     }
 
 }

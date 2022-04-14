@@ -7,7 +7,10 @@ using Unity.Mathematics;
 using System.Linq;
 using UnityEngine.EventSystems;
 
-public class VoxelManager : MonoBehaviour
+// //Debug
+// using System.Diagnostics;
+
+public class VoxelManager : MonoBehaviour, ISaveable
 {
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
     public float voxelSize;
@@ -32,6 +35,7 @@ public class VoxelManager : MonoBehaviour
     public CommandManager commandManager;
     public CommandPanel commandPanel;
     public static VoxelManager instance;
+    #region standard
     void Awake()
     {
         if (instance == null)
@@ -40,28 +44,90 @@ public class VoxelManager : MonoBehaviour
         }
         commandManager = new CommandManager(commandPanel);
     }
+    void Update()
+    {
+        if (!EventSystem.current.IsPointerOverGameObject())
+        {
+            SetCoordMouseHover();
+            if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftControl))
+            {
+                TryGrowVoxels();
+            }
+            if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
+            {
+                TryDrawLine();
+            }
+            if (Input.GetMouseButton(0) && !(Input.GetKey(KeyCode.LeftControl)) && !(Input.GetKey(KeyCode.LeftShift)))
+            {
+                TryAddVoxel();
+            }   
+            if (Input.GetMouseButtonDown(2) && !Input.GetKey(KeyCode.LeftControl))
+            {
+                TryRemoveVoxel();
+            }
+            if (Input.GetMouseButtonDown(2) && Input.GetKey(KeyCode.LeftControl))
+            {
+                TryShrinkVoxel();
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                latestAddedCoord = null;
+            }
+
+        }
+    }
+    void CreateMesh()
+    {
+        proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
+    }
+    
+    #endregion
+
+    #region button
     public void ButtonClear()
     {
         voxels.Clear();
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
     }
-    public void ButtonRedo()
-    {
-        commandManager.RedoCommand();
-    }
     public void ButtonUndo()
     {
         commandManager.UndoCommand();
+
+        var voxelsT = voxels.Values.ToArray();
+        SaveData saveData = new SaveData();
+        saveData.VoxelDatas = new VoxelData[2];
+        saveData.VoxelDatas[0] = new VoxelData(voxelsT[0].coord, voxelsT[0].color);
+        saveData.VoxelDatas[1] = new VoxelData(voxelsT[0].coord, voxelsT[0].color);
+        saveData.Save();
     }
 
     public void ButtonClearHistory()
     {
         commandManager.ClearHistory();
     }
+    #endregion
 
-    public void CreateMesh()
+    #region input
+    void TryRemoveVoxel()
     {
-        proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
+        if(voxels.ContainsKey(selectedCoord) && voxels[selectedCoord] is Voxel voxel)
+        {
+            commandManager.AddCommand(new CommandRemove(selectedCoord, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
+        }
+    }
+    void TryDrawLine()
+    {
+        if (latestSelectedCoord != null)
+        {
+            commandManager.AddCommand(new CommandDrawLine(DrawLine(latestSelectedCoord, placementCoord), color));
+        }
+    }
+    void TryShrinkVoxel()
+    {
+        if (voxels.ContainsKey(selectedCoord))
+        {
+            commandManager.AddCommand(new CommandShrink(RemoveByNormal(voxels[selectedCoord], DirectionStruct.NormalToDirection(placementNormal)), color));
+        }
     }
     void TryAddVoxel()
     {
@@ -79,6 +145,9 @@ public class VoxelManager : MonoBehaviour
             commandManager.AddCommand(new CommandGrow(ExtrudeByNormal(voxels[selectedCoord], DirectionStruct.NormalToDirection(placementNormal)), color));
         }
     }
+    #endregion
+
+    #region commands
     public void AddVoxel(Vector3Int coord)
     {
         Voxel voxel = new Voxel(new List<Voxel>(), coord, new float3(color.r, color.g, color.b));
@@ -139,27 +208,6 @@ public class VoxelManager : MonoBehaviour
             CreateMesh();
         }
     }
-    void TryRemoveVoxel()
-    {
-        if(voxels.ContainsKey(selectedCoord) && voxels[selectedCoord] is Voxel voxel)
-        {
-            commandManager.AddCommand(new CommandRemove(selectedCoord, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
-        }
-    }
-    void TryDrawLine()
-    {
-        if (latestSelectedCoord != null)
-        {
-            commandManager.AddCommand(new CommandDrawLine(DrawLine(latestSelectedCoord, placementCoord), color));
-        }
-    }
-    void TryShrinkVoxel()
-    {
-        if (voxels.ContainsKey(selectedCoord))
-        {
-            commandManager.AddCommand(new CommandShrink(RemoveByNormal(voxels[selectedCoord], DirectionStruct.NormalToDirection(placementNormal)), color));
-        }
-    }
     public void RemoveVoxels(Vector3Int[] removeVoxels)
     {
         for (int i = 0; i < removeVoxels.Length; i++)
@@ -175,7 +223,6 @@ public class VoxelManager : MonoBehaviour
         }
         CreateMesh();
     }
-
     Vector3Int[] DrawLine(Vector3Int c1, Vector3Int c2)
     {
         int n = DiagonalDistance(c1, c2);
@@ -186,72 +233,6 @@ public class VoxelManager : MonoBehaviour
             voxels[i] = (RoundCoord(Vector3.Lerp(c1, c2, t)));
         }
         return voxels;
-    }
-    int DiagonalDistance(Vector3Int c1, Vector3Int c2) => Mathf.Max(Mathf.Abs(c2.x - c1.x), Mathf.Abs(c2.y - c1.y), Mathf.Abs(c2.z - c1.z));
-    Vector3Int RoundCoord(Vector3 coord)
-    {
-        return new Vector3Int(Mathf.RoundToInt(coord.x), Mathf.RoundToInt(coord.y), Mathf.RoundToInt(coord.z));
-    }
-
-    void Update()
-    {
-        if (!EventSystem.current.IsPointerOverGameObject())
-        {
-            SetCoordMouseHover();
-            if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftControl))
-            {
-                TryGrowVoxels();
-            }
-            else if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftShift))
-            {
-                TryDrawLine();
-            }
-
-            if (Input.GetMouseButton(0) && !(Input.GetKey(KeyCode.LeftControl)) && !(Input.GetKey(KeyCode.LeftShift)))
-            {
-                if (!Input.GetKey(KeyCode.LeftShift) && !Input.GetKey(KeyCode.LeftControl))
-                {
-                    TryAddVoxel();
-                }
-            }   
-            if (Input.GetMouseButtonDown(2) && !Input.GetKey(KeyCode.LeftControl))
-            {
-                TryRemoveVoxel();
-            }
-            else if (Input.GetMouseButtonDown(2) && Input.GetKey(KeyCode.LeftControl))
-            {
-                TryShrinkVoxel();
-            }
-            if (Input.GetMouseButtonUp(0))
-            {
-                latestAddedCoord = null;
-            }
-
-        }
-    }
-
-    public Voxel GetNeighbour(Vector3Int coord, Direction direction)
-    {
-        if (voxels.ContainsKey(coord + direction.ToCoord()) && voxels[coord + direction.ToCoord()] is Voxel voxel)
-            return voxel;
-        else
-            return null;
-    }   
-    public List<Voxel> GetAllNeighbours(Vector3Int coord, bool add)
-    {
-        List<Voxel> neighbours = new List<Voxel>();
-
-        for (int i = 0; i < AllDirections.Length; i++)
-        {
-            if (GetNeighbour(coord, AllDirections[i]) is Voxel voxel)
-            {
-                if (add)
-                {
-                    voxel.Neighbours.Add(voxels[coord]);
-                }
-                neighbours.Add(voxel);            }
-        }   
-        return neighbours;
     }
     Vector3Int[] ExtrudeByNormal(Voxel voxel, Direction direction)
     {
@@ -302,7 +283,32 @@ public class VoxelManager : MonoBehaviour
         }
         return removeVoxels.ToArray();
     }
+    #endregion
+    
+    #region voxels
+    public Voxel GetNeighbour(Vector3Int coord, Direction direction)
+    {
+        if (voxels.ContainsKey(coord + direction.ToCoord()) && voxels[coord + direction.ToCoord()] is Voxel voxel)
+            return voxel;
+        else
+            return null;
+    }   
+    public List<Voxel> GetAllNeighbours(Vector3Int coord, bool add)
+    {
+        List<Voxel> neighbours = new List<Voxel>();
 
+        for (int i = 0; i < AllDirections.Length; i++)
+        {
+            if (GetNeighbour(coord, AllDirections[i]) is Voxel voxel)
+            {
+                if (add)
+                {
+                    voxel.Neighbours.Add(voxels[coord]);
+                }
+                neighbours.Add(voxel);            }
+        }   
+        return neighbours;
+    }
     Voxel GetVoxelByCoord(Vector3Int coord)
     {
         if (voxels.ContainsKey(coord) && voxels[coord] is Voxel voxel)
@@ -311,13 +317,14 @@ public class VoxelManager : MonoBehaviour
         }
         return null;
     }
-    HashSet<Voxel> GetConnectedVoxelsByPlame(Voxel voxel, Direction dir)
+    int DiagonalDistance(Vector3Int c1, Vector3Int c2) => Mathf.Max(Mathf.Abs(c2.x - c1.x), Mathf.Abs(c2.y - c1.y), Mathf.Abs(c2.z - c1.z));
+    Vector3Int RoundCoord(Vector3 coord)
     {
-        HashSet<Voxel> allVoxels = new HashSet<Voxel>();
-        return allVoxels;
+        return new Vector3Int(Mathf.RoundToInt(coord.x), Mathf.RoundToInt(coord.y), Mathf.RoundToInt(coord.z));
     }
-    
+    #endregion
 
+    #region coords
     void SetCoordMouseHover()
     {
         Plane plane = new Plane(Vector3.up, gridLevel);
@@ -358,4 +365,55 @@ public class VoxelManager : MonoBehaviour
 
         selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
     }
+    #endregion
+
+    #region save
+
+    public void PopulateSaveData(SaveData a_SaveData)
+    {
+        // Voxel[] allVoxels = voxels.Values.ToArray();
+        // VoxelData[] voxelDatas = new VoxelData[allVoxels.Length];
+        // for (int i = 0; i < allVoxels.Length; i++)
+        // {
+        //     voxelDatas[i] = new VoxelData(allVoxels[i].coord, allVoxels[i].color);
+        // }
+        // a_SaveData.voxelDatas = voxelDatas;
+    }
+
+    public void LoadFromSaveData(SaveData a_SaveData)
+    {
+        throw new System.NotImplementedException();
+    }
+    #endregion
 }
+
+    // public void ButtonRedo()
+    // {
+    //     commandManager.RedoCommand();
+
+        
+
+    //     var key = voxels.Keys.ToArray()[0];
+    //     Voxel voxel;
+    //     bool test;
+    //     Stopwatch stopwatch = new Stopwatch();
+
+
+    //     stopwatch.Start();
+    //     for (int i = 0; i < 1000000; i++)
+    //     {
+    //         test = false | true;
+    //     }
+    //     stopwatch.Stop();
+    //     UnityEngine.Debug.Log("ContainsKey: " + stopwatch.Elapsed);
+        
+    //     stopwatch.Reset();
+
+    //     stopwatch.Start();
+    //     for (int i = 0; i < 1000000; i++)
+    //     {
+    //         test = false || true;
+    //     }
+    //     stopwatch.Stop();
+    //     UnityEngine.Debug.Log("TryGetValue: " + stopwatch.Elapsed);
+    // }
