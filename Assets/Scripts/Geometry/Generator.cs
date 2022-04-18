@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Unity.Collections;
 using Unity.Mathematics;
 using UnityEngine;
@@ -34,6 +35,10 @@ namespace Geometry.Generators {
 			Vertex vertex = new Vertex();
 			int v0, v1, v2, v3 = 0;
 
+			// // TEST
+			// int[] neighbours = new int[20];
+			// neighbours[0] =1;
+
 			for (int i = 0; i < FaceAmount; i++)
 			{
 				vertex.color = Faces[i].color;
@@ -64,6 +69,20 @@ namespace Geometry.Generators {
 				streams.SetTriangle(i * 2, int3(v2, v0, v1));
 				streams.SetTriangle(i * 2 + 1, int3(v0, v2, v3));
 			}
+			
+			// bool optimze = true;
+			// if (optimze)
+			// {
+			// 	// for (int i = 0; i < streams.MeshData.GetIndices; i++)
+			// 	// {
+			// 	// 	Debug.Log("Optimze");
+			// 	// }
+			// }
+
+
 		}
+
     } 
+
+
 }

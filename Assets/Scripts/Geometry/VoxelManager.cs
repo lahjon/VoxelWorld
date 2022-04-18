@@ -20,6 +20,8 @@ public class VoxelManager : MonoBehaviour, ISaveable
     Vector3Int placementCoord; // the coord in which the next voxel will be placed
     Vector3Int selectedCoord; // the coord currently selected
     Vector3Int? latestAddedCoord = null; // used to stop drawing when holding down mb
+    //Vector3Int? latestRemoveCoord = null; // used to stop drawing when holding down mb
+    Vector3Int latestPlacementCoord; // used to draw lines
     Vector3Int latestSelectedCoord; // used to draw lines
     Vector3Int placementNormal; // the normal direction of the latest placement
     public static Color color;
@@ -51,6 +53,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 TryDrawLine();
             }
+            if (Input.GetMouseButtonDown(2) && Input.GetKey(KeyCode.LeftShift))
+            {
+                TryRemoveLine();
+            }
             if (Input.GetMouseButton(0) && !(Input.GetKey(KeyCode.LeftControl)) && !(Input.GetKey(KeyCode.LeftShift)))
             {
                 TryAddVoxel();
@@ -75,6 +81,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 TrySetVoxelColor();
             }
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                TryFillColor();
+            }
 
         }
     }
@@ -95,6 +105,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
     {
         commandManager.UndoCommand();
     }
+    public void ButtonRedo()
+    {
+        commandManager.RedoCommand();
+    }
     public void ButtonClearHistory()
     {
         commandManager.ClearHistory();
@@ -112,6 +126,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #region input
     void TryRemoveVoxel()
     {
+        latestSelectedCoord = selectedCoord;
         if(voxels.ContainsKey(selectedCoord) && voxels[selectedCoord] is Voxel voxel)
         {
             commandManager.AddCommand(new CommandRemove(selectedCoord, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
@@ -119,10 +134,24 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     void TryDrawLine()
     {
-        if (latestSelectedCoord != null)
+
+        Vector3Int[] coords = DrawLine(latestPlacementCoord, placementCoord);
+        if (coords.Length > 0)
         {
-            commandManager.AddCommand(new CommandDrawLine(DrawLine(latestSelectedCoord, placementCoord), color));
+            latestPlacementCoord = coords[coords.Length - 1];
         }
+        commandManager.AddCommand(new CommandDrawLine(coords, color));
+    
+    }
+
+    void TryRemoveLine()
+    {
+        Vector3Int[] coords = DrawLine(latestSelectedCoord, selectedCoord);
+        if (coords.Length > 0)
+        {
+            latestSelectedCoord = coords[coords.Length - 1];
+        }
+        commandManager.AddCommand(new CommandRemoveLine(coords, color));
     }
 
     void TryShrinkVoxel()
@@ -134,13 +163,23 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     void TryAddVoxel()
     {
+        latestSelectedCoord = selectedCoord;
         if (latestAddedCoord != selectedCoord && !voxels.ContainsKey(placementCoord))
         {
             latestAddedCoord = placementCoord;
-            latestSelectedCoord = placementCoord;
+            latestPlacementCoord = placementCoord;
             commandManager.AddCommand(new CommandAdd(placementCoord, color));
         }
     }
+    // void TryRemoveVoxels()
+    // {
+    //     if (latestRemoveCoord != placementCoord && voxels.ContainsKey(selectedCoord))
+    //     {
+    //         latestRemoveCoord = selectedCoord;
+    //         latestPlacementCoord = selectedCoord;
+    //         commandManager.AddCommand(new CommandRemove(selectedCoord, color));
+    //     }
+    // }
     void TryGrowVoxels()
     {
         if (voxels.ContainsKey(selectedCoord))
@@ -157,6 +196,15 @@ public class VoxelManager : MonoBehaviour, ISaveable
             commandManager.AddCommand(new CommandChangeColor(selectedCoord, color, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
         }
     }
+
+    void TryFillColor()
+    {
+        Voxel voxel;
+        if (voxels.TryGetValue(selectedCoord, out voxel))
+        {
+            commandManager.AddCommand(new CommandFillColor(FillColor(voxel), color, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
+        }
+    }
     #endregion
 
     #region commands
@@ -169,6 +217,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
             CreateMesh();
         }
     }
+    public void SetVoxelsColor(Vector3Int[] coords, Color aColor)
+    {
+        Voxel voxel;
+        for (int i = 0; i < coords.Length; i++)
+        {
+            if (voxels.TryGetValue(coords[i], out voxel))
+            {
+                voxel.color = new float3(aColor.r, aColor.g, aColor.b);
+            } 
+        }
+        CreateMesh();
+    }
     public void AddVoxel(Vector3Int coord, Color aColor)
     {
         Voxel voxel = new Voxel(new List<Voxel>(), coord, new float3(aColor.r, aColor.g, aColor.b));
@@ -176,23 +236,23 @@ public class VoxelManager : MonoBehaviour, ISaveable
         voxel.Neighbours = GetAllNeighbours(coord, true);
         CreateMesh();
     }
-    public void AddVoxels(Vector3Int[] addVoxels)
-    {
-        for (int i = 0; i < addVoxels.Length; i++)
-        {
-            if (!voxels.ContainsKey(addVoxels[i]))
-            {
-                Voxel voxel = new Voxel(new List<Voxel>(), addVoxels[i], new float3(color.r, color.g, color.b));
-                voxels.Add(addVoxels[i], voxel);
-                voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
-            }
-        }
-        if (addVoxels.Length > 0)
-        {
-            latestSelectedCoord = addVoxels[addVoxels.Length - 1];
-        }
-        CreateMesh();
-    }
+    // public void AddVoxels(Vector3Int[] addVoxels)
+    // {
+    //     for (int i = 0; i < addVoxels.Length; i++)
+    //     {
+    //         if (!voxels.ContainsKey(addVoxels[i]))
+    //         {
+    //             Voxel voxel = new Voxel(new List<Voxel>(), addVoxels[i], new float3(color.r, color.g, color.b));
+    //             voxels.Add(addVoxels[i], voxel);
+    //             voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
+    //         }
+    //     }
+    //     if (addVoxels.Length > 0)
+    //     {
+    //         latestSelectedCoord = addVoxels[addVoxels.Length - 1];
+    //     }
+    //     CreateMesh();
+    // }
     public void AddVoxels(Vector3Int[] addVoxels, Color aColor)
     {
         for (int i = 0; i < addVoxels.Length; i++)
@@ -204,10 +264,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
                 voxel.Neighbours = GetAllNeighbours(addVoxels[i], true);
             }
         }
-        if (addVoxels.Length > 0)
-        {
-            latestSelectedCoord = addVoxels[addVoxels.Length - 1];
-        }
+        // if (addVoxels.Length > 0)
+        // {
+        //     latestSelectedCoord = addVoxels[addVoxels.Length - 1];
+        // }
         CreateMesh();
     }
     public void RemoveVoxel(Vector3Int coord)
@@ -238,6 +298,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
         CreateMesh();
     }
     Vector3Int[] DrawLine(Vector3Int c1, Vector3Int c2)
+    {
+        int n = DiagonalDistance(c1, c2);
+        Vector3Int[] voxels = new Vector3Int[n + 1];
+        for (int i = 0; i <= n; i++)
+        {
+            float t = n == 0 ? 0f : (float)i / n;
+            voxels[i] = (RoundCoord(Vector3.Lerp(c1, c2, t)));
+        }
+        return voxels;
+    }
+
+    Vector3Int[] DrawLineInvert(Vector3Int c1, Vector3Int c2)
     {
         int n = DiagonalDistance(c1, c2);
         Vector3Int[] voxels = new Vector3Int[n + 1];
@@ -296,6 +368,27 @@ public class VoxelManager : MonoBehaviour, ISaveable
             searchVoxels.RemoveAt(0);
         }
         return removeVoxels.ToArray();
+    }
+
+    Vector3Int[] FillColor(Voxel voxel)
+    {
+        HashSet<Vector3Int> foundVoxels = new HashSet<Vector3Int>();
+        List<Voxel> searchVoxels = new List<Voxel>();
+        foundVoxels.Add(voxel.coord);
+        searchVoxels.Add(voxel);
+        while (searchVoxels.Count > 0)
+        {
+            for (int i = 0; i < DirectionStruct.Directions.Length; i++)
+            {
+                if (GetVoxelByCoord(searchVoxels[0].coord + DirectionStruct.Directions[i].ToCoord()) is Voxel aVoxel &&!foundVoxels.Contains(aVoxel.coord))
+                {
+                    foundVoxels.Add(aVoxel.coord);
+                    searchVoxels.Add(aVoxel);
+                }
+            }
+            searchVoxels.RemoveAt(0);
+        }
+        return foundVoxels.ToArray();
     }
 
     void SampleColor()
