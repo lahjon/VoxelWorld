@@ -1,31 +1,23 @@
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
-using MessagePack;
-using MessagePack.Resolvers;
-using MessagePack.Formatters;
-
-[MessagePackObject]
 public class SaveData
 {   
-    [Key(0)]
-    public VoxelData[] VoxelDatas{get;set;}
-    public void Save()
+    public VoxelData[] voxelDatas;
+    public string ToJson()
     {
-        // Do this once and store it for reuse.
-    var resolver = MessagePack.Resolvers.CompositeResolver.Create(
-    MessagePack.Unity.Extension.UnityBlitResolver.Instance,
-    MessagePack.Unity.UnityResolver.Instance,
-
-    // finally use standard resolver
-    StandardResolver.Instance
-);
-var options = MessagePackSerializerOptions.Standard.WithResolver(resolver);
-
-        byte[] bytes = MessagePackSerializer.Serialize(this);
-        FileManager.WriteToFile("SaveData01.dat", bytes);
+        return JsonUtility.ToJson(this);
+    }
+    public void LoadFromJson(string a_Json)
+    {
+        JsonUtility.FromJsonOverwrite(a_Json, this);
     }
 }
+
+// public class SaveDataVoxel : SaveData
+// {
+//     public VoxelData[] voxelDatas;
+// }
 
 [System.Serializable]
 public struct VoxelData

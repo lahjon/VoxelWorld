@@ -41,13 +41,25 @@ public class ValuePicker : MonoBehaviour
         value = slider.value;
         Color = Color.HSVToRGB(hue, sat, value);
     }
+
+    public void SetColor(Color color, bool updatePalette = true)
+    {
+        // called from sample voxel
+        if (updatePalette) VoxelManager.instance.palette.UpdateColor(_color);
+        Color = color;
+        float val = 0;
+        Color.RGBToHSV(color, out hue, out sat, out val);
+        slider.value = val;
+        VoxelManager.instance.colorWheel.SetPickerPositionFromColor(color);
+    }
+
     public void GenerateImage(Color color)
     {
         Texture2D texture = new Texture2D(w, h, TextureFormat.ARGB32, false);
         float val = 0;
-        UnityEngine.Color.RGBToHSV(color, out hue, out sat, out val);
+        Color.RGBToHSV(color, out hue, out sat, out val);
         Color mainColor = color;
-        Color secColor = UnityEngine.Color.black;
+        Color secColor = Color.black;
         Color = color;
         
         float f = 0;
@@ -56,7 +68,7 @@ public class ValuePicker : MonoBehaviour
             f = (float)x / (float)w;
             for (int y = 0; y < h; y++)
             {
-                texture.SetPixel(x, y, UnityEngine.Color.Lerp(secColor, mainColor, f));
+                texture.SetPixel(x, y, Color.Lerp(secColor, mainColor, f));
             }
         }
 

@@ -17,16 +17,23 @@ namespace Geometry {
             this.color = color;
         }
 
+        public Voxel(VoxelData data)
+        {
+            this.Neighbours = new List<Voxel>();
+            this.coord = data.coord;
+            this.color = data.color;
+        }
+
         public List<Face> GetFaces()
         {
             List<Face> faces = new List<Face>();
-            for (int i = 0; i < VoxelManager.AllDirections.Length; i++)
+            for (int i = 0; i < DirectionStruct.Directions.Length; i++)
             {
-                if (GetNeighbour(coord + VoxelManager.AllDirections[i].ToCoord()) is Voxel voxel)
+                if (GetNeighbour(coord + DirectionStruct.Directions[i].ToCoord()) is Voxel voxel)
                 {
                     continue;
                 }
-                faces.Add(VoxelManager.AllDirections[i].CreateFace(new float3(coord.x, coord.y, coord.z), color));
+                faces.Add(DirectionStruct.Directions[i].CreateFace(new float3(coord.x, coord.y, coord.z), color));
             }
             return faces;
         }

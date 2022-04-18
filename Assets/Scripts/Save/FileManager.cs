@@ -12,6 +12,7 @@ public static class FileManager
         try
         {
             File.WriteAllText(fullPath, a_FileContents);
+            Debug.Log($"Success writing file to {fullPath}");
             return true;
         }
         catch (Exception e)

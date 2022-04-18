@@ -23,5 +23,4 @@ public class SelectionCube : MonoBehaviour
             transform.position = (Vector3)newCoord + new Vector3(.5f, .5f, .5f);
         }
     }
-
 }

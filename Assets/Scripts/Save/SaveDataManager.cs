@@ -11,25 +11,25 @@ public static class SaveDataManager
             saveable.PopulateSaveData(sd);
         }
 
-        // if (FileManager.WriteToFile("SaveData01.dat", sd.ToJson()))
-        // {
-        //     Debug.Log("Save successful");
-        // }
+        if (FileManager.WriteToFile("SaveData01.dat", sd.ToJson()))
+        {
+            Debug.Log("Save successful");
+        }
     }
     
     public static void LoadJsonData(IEnumerable<ISaveable> a_Saveables)
     {
         if (FileManager.LoadFromFile("SaveData01.dat", out var json))
         {
-            // SaveData sd = new SaveData();
-            // sd.LoadFromJson(json);
+            SaveData sd = new SaveData();
+            sd.LoadFromJson(json);
 
-            // foreach (var saveable in a_Saveables)
-            // {
-            //     saveable.LoadFromSaveData(sd);
-            // }
+            foreach (var saveable in a_Saveables)
+            {
+                saveable.LoadFromSaveData(sd);
+            }
             
-            // Debug.Log("Load complete");
+            Debug.Log("Load complete");
         }
     }
 }

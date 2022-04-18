@@ -11,43 +11,86 @@ public class ColorWheel : MonoBehaviour
 {
     public Image image;
     public RectTransform picker;
-    public VoxelManager voxelManager;
     public ValuePicker valuePicker;
-    public bool Holding {get;set;}
-    int height, width;
+    int radius;
+    bool _holding;
+    public bool Holding 
+    {
+        get => _holding;
+        set
+        {
+            if (_holding && !value)
+            {
+                VoxelManager.instance.palette.UpdateColor(valuePicker.Color);
+            }
+            _holding = value; 
+        }
+    }
     int size;
 
     void Start()
     {
         size = 250;
-        DrawCircle(size);
+        radius = size / 2;
+        DrawCircle();
     }
 
     void Update()
     {
         if (Holding)
         {
-            SetPickerPosition();
+            InBoundry();
+            SetPickerPositionFromMouse();
         }
     }
 
-    public void SetPickerPosition()
+    void InBoundry()
+    {
+        picker.position = Input.mousePosition;
+        (float r, float deg) = XY2Polar((int)picker.localPosition.x, (int)picker.localPosition.y);
+
+        if (r > radius) picker.localPosition = ClosestPointOnCircle(picker.localPosition);
+        
+    }
+
+    public void SetPickerPositionFromColor(Color aColor)
+    {
+        float hue, value, sat;
+        Color color;
+        
+        Color.RGBToHSV(aColor, out hue,out sat,out value);
+        aColor = Color.HSVToRGB(hue, sat, 1);
+        
+        for (int x = 0; x < size; x++)
+        {
+            for (int y = 0; y < size; y++)
+            {
+                color = image.sprite.texture.GetPixel(x, y);
+                if (color == aColor)
+                {
+                    picker.localPosition = new Vector3(((float)x).Remap(0, size, -radius, radius), ((float)y).Remap(0, size, -radius, radius), picker.localPosition.z);
+                    valuePicker.GenerateImage(aColor);
+                    return;
+                }
+            }
+        }
+    }
+
+    public void SetPickerPositionFromMouse()
     {
         // get position from picker and translate to pixel position
-        picker.position = Input.mousePosition;
         Vector3Int pixelPos = Vector3Int.RoundToInt(new Vector3(
-                picker.localPosition.x.Remap(-size/2, size/2, 0, size), 
-                picker.localPosition.y.Remap(-size/2, size/2, 0, size), 
-                picker.localPosition.z.Remap(-size/2, size/2, 0, size))
+                picker.localPosition.x.Remap(-radius, radius, 0, size), 
+                picker.localPosition.y.Remap(-radius, radius, 0, size), 
+                picker.localPosition.z.Remap(-radius, radius, 0, size))
             );
 
         // get pixel color value and set new color
         valuePicker.GenerateImage(image.sprite.texture.GetPixel(pixelPos.x, pixelPos.y));
     }
 
-    void DrawCircle(int size)
+    void DrawCircle()
     {
-        int radius = size / 2;
         Texture2D texture = new Texture2D(size, size, TextureFormat.ARGB32, false);
         Color emptyColor = new Color(0,0,0,0);
         for (int x = -radius; x < radius; x++)
@@ -95,13 +138,6 @@ public class ColorWheel : MonoBehaviour
         return (r, deg);
     }
 
-}
+    Vector3 ClosestPointOnCircle(Vector3 point) => Vector3.Normalize(point) * (radius - .9f);
 
-public static class ExtensionMethods 
-{
-    public static float Remap (this float value, float from1, float to1, float from2, float to2) 
-    {
-        // remap range1 to range2, 1, 0, 2, 0, 10 = 5
-        return (value - from1) / (to1 - from1) * (to2 - from2) + from2;
-    }
 }

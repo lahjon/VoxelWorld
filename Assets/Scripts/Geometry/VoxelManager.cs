@@ -23,17 +23,11 @@ public class VoxelManager : MonoBehaviour, ISaveable
     Vector3Int latestSelectedCoord; // used to draw lines
     Vector3Int placementNormal; // the normal direction of the latest placement
     public static Color color;
-    public static Direction[] AllDirections = new Direction[6]{
-                                                Direction.XPos,
-                                                Direction.XNeg,
-                                                Direction.YPos,
-                                                Direction.YNeg,
-                                                Direction.ZPos,
-                                                Direction.ZNeg,
-                                            };
-
     public CommandManager commandManager;
     public CommandPanel commandPanel;
+    public ValuePicker valuePicker;
+    public ColorWheel colorWheel;
+    public Palette palette;
     public static VoxelManager instance;
     #region standard
     void Awake()
@@ -73,6 +67,14 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 latestAddedCoord = null;
             }
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                SampleColor();
+            }
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                TrySetVoxelColor();
+            }
 
         }
     }
@@ -92,18 +94,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public void ButtonUndo()
     {
         commandManager.UndoCommand();
-
-        var voxelsT = voxels.Values.ToArray();
-        SaveData saveData = new SaveData();
-        saveData.VoxelDatas = new VoxelData[2];
-        saveData.VoxelDatas[0] = new VoxelData(voxelsT[0].coord, voxelsT[0].color);
-        saveData.VoxelDatas[1] = new VoxelData(voxelsT[0].coord, voxelsT[0].color);
-        saveData.Save();
     }
-
     public void ButtonClearHistory()
     {
         commandManager.ClearHistory();
+    }
+    public void ButtonSave()
+    {
+        SaveDataManager.SaveJsonData(Helpers.FindInterfacesOfType<ISaveable>());
+    }
+    public void ButtonLoad()
+    {
+        SaveDataManager.LoadJsonData(Helpers.FindInterfacesOfType<ISaveable>());
     }
     #endregion
 
@@ -122,6 +124,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             commandManager.AddCommand(new CommandDrawLine(DrawLine(latestSelectedCoord, placementCoord), color));
         }
     }
+
     void TryShrinkVoxel()
     {
         if (voxels.ContainsKey(selectedCoord))
@@ -145,15 +148,26 @@ public class VoxelManager : MonoBehaviour, ISaveable
             commandManager.AddCommand(new CommandGrow(ExtrudeByNormal(voxels[selectedCoord], DirectionStruct.NormalToDirection(placementNormal)), color));
         }
     }
+
+    void TrySetVoxelColor()
+    {
+        Voxel voxel;
+        if (voxels.TryGetValue(selectedCoord, out voxel))
+        {
+            commandManager.AddCommand(new CommandChangeColor(selectedCoord, color, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
+        }
+    }
     #endregion
 
     #region commands
-    public void AddVoxel(Vector3Int coord)
+    public void SetVoxelColor(Vector3Int coord, Color aColor)
     {
-        Voxel voxel = new Voxel(new List<Voxel>(), coord, new float3(color.r, color.g, color.b));
-        voxels.Add(coord, voxel);
-        voxel.Neighbours = GetAllNeighbours(coord, true);
-        CreateMesh();
+        Voxel voxel;
+        if (voxels.TryGetValue(coord, out voxel))
+        {
+            voxel.color = new float3(aColor.r, aColor.g, aColor.b);
+            CreateMesh();
+        }
     }
     public void AddVoxel(Vector3Int coord, Color aColor)
     {
@@ -283,6 +297,15 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         return removeVoxels.ToArray();
     }
+
+    void SampleColor()
+    {
+        Voxel voxel;
+        if (voxels.TryGetValue(selectedCoord, out voxel))
+        {
+            valuePicker.SetColor(new Color(voxel.color.x, voxel.color.y, voxel.color.z));
+        }
+    }
     #endregion
     
     #region voxels
@@ -297,9 +320,9 @@ public class VoxelManager : MonoBehaviour, ISaveable
     {
         List<Voxel> neighbours = new List<Voxel>();
 
-        for (int i = 0; i < AllDirections.Length; i++)
+        for (int i = 0; i < DirectionStruct.Directions .Length; i++)
         {
-            if (GetNeighbour(coord, AllDirections[i]) is Voxel voxel)
+            if (GetNeighbour(coord, DirectionStruct.Directions[i]) is Voxel voxel)
             {
                 if (add)
                 {
@@ -371,18 +394,26 @@ public class VoxelManager : MonoBehaviour, ISaveable
 
     public void PopulateSaveData(SaveData a_SaveData)
     {
-        // Voxel[] allVoxels = voxels.Values.ToArray();
-        // VoxelData[] voxelDatas = new VoxelData[allVoxels.Length];
-        // for (int i = 0; i < allVoxels.Length; i++)
-        // {
-        //     voxelDatas[i] = new VoxelData(allVoxels[i].coord, allVoxels[i].color);
-        // }
-        // a_SaveData.voxelDatas = voxelDatas;
+        // SaveDataVoxel saveDataVoxel = (SaveDataVoxel)a_SaveData;
+        Voxel[] allVoxels = voxels.Values.ToArray();
+        VoxelData[] voxelDatas = new VoxelData[allVoxels.Length];
+        for (int i = 0; i < allVoxels.Length; i++)
+        {
+            voxelDatas[i] = new VoxelData(allVoxels[i].coord, allVoxels[i].color);
+        }
+        a_SaveData.voxelDatas = voxelDatas;
     }
 
     public void LoadFromSaveData(SaveData a_SaveData)
     {
-        throw new System.NotImplementedException();
+        voxels.Clear();
+        Dictionary<Vector3Int, Voxel> newVoxels = new Dictionary<Vector3Int, Voxel>();
+        for (int i = 0; i < a_SaveData.voxelDatas.Length; i++)
+        {
+            newVoxels.Add(a_SaveData.voxelDatas[i].coord, new Voxel(a_SaveData.voxelDatas[i]));
+        }
+        voxels = newVoxels;
+        proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
     }
     #endregion
 }
