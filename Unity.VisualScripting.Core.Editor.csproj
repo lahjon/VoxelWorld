@@ -256,8 +256,8 @@
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Products\ProductAttribute.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Utilities\EditorLinqUtility.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Exceptions\EditorDebugUtility.cs" />
-     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Windows\AboutWindow\AboutablePage.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Product\LudiqProduct.cs" />
+     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Windows\AboutWindow\AboutablePage.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Utilities\NativeUtility.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Interface\Licenses\License.CCA3.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Debugging\GraphDebugDataProvider.cs" />
@@ -312,9 +312,9 @@
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Exceptions\UnityEditorInternalException.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Changelogs\LegacyLudiqGraphs\Changelog_1_4_0.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Inspection\Special\ListInspector.cs" />
-     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Analysis\IAnalysis.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Dependencies\ReorderableList\ElementAdderMenu\ElementAdderMenuBuilder.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Dependencies\ReorderableList\Internal\GUIHelper.cs" />
+     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Analysis\IAnalysis.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Changelogs\LegacyLudiqGraphs\Changelog_1_0_0.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Windows\UpdateWizard\UpdateBackupPage.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugins\IPluginLinked.cs" />
@@ -435,8 +435,8 @@
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Changelogs\LegacyLudiqGraphs\Changelog_1_2_2.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Changelogs\LegacyLudiqCore\Changelog_1_4_9.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Utilities\EditorFilteringUtility.cs" />
-     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Migrations\Migration_1_2_4_to_1_3_0.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Changelogs\LegacyLudiqGraphs\Changelog_1_0_3.cs" />
+     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Plugin\Migrations\Migration_1_2_4_to_1_3_0.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Widgets\IGraphElementWidget.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Inspection\MachineEditor.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Editor\VisualScripting.Core\Canvases\WidgetList.cs" />

@@ -57,8 +57,8 @@
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Window\TimelineWindow_Duration.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Tooltip.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Manipulators\Sequence\SelectAndMoveItem.cs" />
-     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Utilities\Scopes\LabelWidthScope.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Items\ItemsGroup.cs" />
+     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Utilities\Scopes\LabelWidthScope.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\TimelineUtility.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Signals\SignalEmitterEditor.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\State\ISequenceState.cs" />
@@ -90,8 +90,8 @@
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\inspectors\BuiltInCurvePresets.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\inspectors\GroupTrackInspector.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Audio\AudioPlayableAssetEditor.cs" />
-     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\inspectors\EditorClip.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Recording\TimelineRecording.cs" />
+     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\inspectors\EditorClip.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Recording\TimelineRecording_Monobehaviour.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\treeview\Drawers\TrackDrawer.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\treeview\Snapping\SnapEngine.cs" />
@@ -233,8 +233,8 @@
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Manipulators\Utils\ManipulatorsUtils.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Extensions\AnimationTrackExtensions.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Window\WindowConstants.cs" />
-     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Manipulators\EditMode.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\treeview\Snapping\ISnappable.cs" />
+     <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Manipulators\EditMode.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\treeview\TimelineDataSource.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\CustomEditors\MarkerEditor.cs" />
      <Compile Include="Library\PackageCache\com.unity.timeline@1.5.2\Editor\Animation\AnimationOffsetMenu.cs" />

@@ -379,8 +379,8 @@
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Events\MessageListeners\MonoBehaviourMessageListeners\UnityOnCollisionExitMessageListener.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Machines\Machine.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Ensure\EnsureThat.Objects.cs" />
-     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Serialization\ISerializationDepender.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Variables\VariableKindAttribute.cs" />
+     <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Serialization\ISerializationDepender.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Events\MessageListeners\MonoBehaviourMessageListeners\UnityOnTriggerEnter2DMListener.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Platforms\PlatformUtility.cs" />
      <Compile Include="Library\PackageCache\com.unity.visualscripting@1.5.2\Runtime\VisualScripting.Core\Reflection\TypesMatching.cs" />

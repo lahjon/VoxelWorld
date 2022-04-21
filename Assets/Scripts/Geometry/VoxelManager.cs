@@ -14,7 +14,20 @@ public class VoxelManager : MonoBehaviour, ISaveable
 {
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
     public float voxelSize;
-    public int gridLevel;
+    public GameObject gridPlane;
+    public bool selectMode, drawMode;
+    int _gridLevel;
+    [SerializeField] int gridLevelMax = 50;
+    int gridLevelMin = 0;
+    public int GridLevel
+    {
+        get => _gridLevel;
+        set
+        {
+            _gridLevel = value;
+            gridPlane.transform.localPosition = new Vector3(gridPlane.transform.localPosition.x, GridLevel + .01f, gridPlane.transform.localPosition.z);
+        }
+    }
     public ProceduralMesh proceduralMesh;
     public SelectionCube selectionCube;
     Vector3Int placementCoord; // the coord in which the next voxel will be placed
@@ -42,7 +55,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     void Update()
     {
-        if (!EventSystem.current.IsPointerOverGameObject())
+        if (drawMode && !EventSystem.current.IsPointerOverGameObject())
         {
             SetCoordMouseHover();
             if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftControl))
@@ -85,6 +98,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 TryFillColor();
             }
+            UpdateGridLevel();
 
         }
     }
@@ -96,6 +110,16 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #endregion
 
     #region button
+    public void ButtonSetDrawing()
+    {
+        drawMode = true;
+        selectMode = false;
+    }
+    public void ButtonSetSelect()
+    {
+        selectMode = true;
+        drawMode = false;
+    }
     public void ButtonClear()
     {
         voxels.Clear();
@@ -124,6 +148,19 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #endregion
 
     #region input
+
+    void UpdateGridLevel()
+    {
+        if (Input.mouseScrollDelta.y > 0 && GridLevel < gridLevelMax)
+        {
+            GridLevel++;
+        }
+        else if (Input.mouseScrollDelta.y < 0 && GridLevel > gridLevelMin)
+        {
+            GridLevel--;
+        }
+    }
+
     void TryRemoveVoxel()
     {
         latestSelectedCoord = selectedCoord;
@@ -443,7 +480,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #region coords
     void SetCoordMouseHover()
     {
-        Plane plane = new Plane(Vector3.up, gridLevel);
+        Plane plane = new Plane(Vector3.up, GridLevel);
         float distance;
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
@@ -471,13 +508,13 @@ public class VoxelManager : MonoBehaviour, ISaveable
             placementCoord = selCoord + normal;
             selectedCoord = selCoord;
         }
-        else if (plane.Raycast(ray, out distance))
-        {
-            Vector3 pos = ray.GetPoint(distance);
-            placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), gridLevel, Mathf.FloorToInt(pos.z));
-            selectedCoord = placementCoord;
-            placementNormal = Vector3Int.up;
-        }
+        // else if (plane.Raycast(ray, out distance))
+        // {
+        //     Vector3 pos = ray.GetPoint(distance);
+        //     placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), GridLevel, Mathf.FloorToInt(pos.z));
+        //     selectedCoord = placementCoord;
+        //     placementNormal = Vector3Int.up;
+        // }
 
         selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
     }

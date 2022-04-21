@@ -29,7 +29,6 @@ public class Palette : MonoBehaviour
         colors.normalColor = color;
         paletts[index].colors = colors;
         index++;
-        Debug.Log(index);
     } 
 
 }
