@@ -13,9 +13,29 @@ using UnityEngine.EventSystems;
 public class VoxelManager : MonoBehaviour, ISaveable
 {
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
+    public PositionHandle positionHandle;
+    public List<Vector3Int> selectedVoxels = new List<Vector3Int>();
     public float voxelSize;
     public GameObject gridPlane;
-    public bool selectMode, drawMode;
+    bool _selectMode, _drawMode;
+    public bool SelectMode
+    {
+        get => _selectMode;
+        set
+        {
+            _selectMode = value;
+            positionHandle.gameObject.SetActive(_selectMode);
+        }
+    }
+    public bool DrawMode
+    {
+        get => _drawMode;
+        set
+        {
+            _drawMode = value;
+        }
+    }
+
     int _gridLevel;
     [SerializeField] int gridLevelMax = 50;
     int gridLevelMin = 0;
@@ -55,7 +75,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     void Update()
     {
-        if (drawMode && !EventSystem.current.IsPointerOverGameObject())
+        if (DrawMode && !EventSystem.current.IsPointerOverGameObject())
         {
             SetCoordMouseHover();
             if (Input.GetMouseButtonDown(0) && Input.GetKey(KeyCode.LeftControl))
@@ -112,13 +132,13 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #region button
     public void ButtonSetDrawing()
     {
-        drawMode = true;
-        selectMode = false;
+        DrawMode = true;
+        SelectMode = false;
     }
     public void ButtonSetSelect()
     {
-        selectMode = true;
-        drawMode = false;
+        SelectMode = true;
+        DrawMode = false;
     }
     public void ButtonClear()
     {
@@ -245,6 +265,14 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #endregion
 
     #region commands
+    public void AddMoveCommand(Vector3Int offset)
+    {
+        commandManager.AddCommand(new CommandMove(selectedVoxels.ToArray(), offset), false);
+    }
+    public void TransformVoxels(Vector3Int offset)
+    {
+        MoveVoxels(selectedVoxels.ToArray(), offset);
+    }
     public void SetVoxelColor(Vector3Int coord, Color aColor)
     {
         Voxel voxel;
@@ -356,6 +384,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
             voxels[i] = (RoundCoord(Vector3.Lerp(c1, c2, t)));
         }
         return voxels;
+    }
+    public void MoveVoxels(Vector3Int[] coords, Vector3Int offset)
+    {
+        Voxel voxel;
+        for (int i = 0; i < coords.Length; i++)
+        {
+            if (voxels.TryGetValue(coords[i], out voxel))
+            {
+                voxel.coord -= offset;
+            }
+        }
+        CreateMesh();
     }
     Vector3Int[] ExtrudeByNormal(Voxel voxel, Direction direction)
     {
@@ -508,13 +548,13 @@ public class VoxelManager : MonoBehaviour, ISaveable
             placementCoord = selCoord + normal;
             selectedCoord = selCoord;
         }
-        // else if (plane.Raycast(ray, out distance))
-        // {
-        //     Vector3 pos = ray.GetPoint(distance);
-        //     placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), GridLevel, Mathf.FloorToInt(pos.z));
-        //     selectedCoord = placementCoord;
-        //     placementNormal = Vector3Int.up;
-        // }
+        else if (plane.Raycast(ray, out distance))
+        {
+            Vector3 pos = ray.GetPoint(distance);
+            placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), GridLevel, Mathf.FloorToInt(pos.z));
+            selectedCoord = placementCoord;
+            placementNormal = Vector3Int.up;
+        }
 
         selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
     }

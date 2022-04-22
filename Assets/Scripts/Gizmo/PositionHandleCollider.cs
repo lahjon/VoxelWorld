@@ -4,7 +4,8 @@ using UnityEngine;
 public class PositionHandleCollider : MonoBehaviour
 {
     public PositionHandle positionHandle;
-    Vector3 startPos, lastPos, delta;
+    Vector3 lastPos, delta;
+    Vector3Int startPos;
     public System.Action move;
     [SerializeField] HandlePositions handlePositions;
     Color startColor;
@@ -97,14 +98,19 @@ public class PositionHandleCollider : MonoBehaviour
 
             if (!tracking)
             {
+                // startPos = new Vector3Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
+                //startPos = Vector3Int.zero;
+
                 lastPos = pos;
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(0, 0, delta.z);
+            positionHandle. Position += new Vector3(0, 0, delta.z);
+            //positionHandle.Offset = new Vector3Int(Mathf.RoundToInt(pos.x), Mathf.RoundToInt(pos.y), Mathf.RoundToInt(pos.z));
             lastPos = pos;
         }
     }
+
 
     void MoveGA()
     {
@@ -121,7 +127,7 @@ public class PositionHandleCollider : MonoBehaviour
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(0, delta.y, 0);
+            positionHandle.Position += new Vector3(0, delta.y, 0);
             lastPos = pos;
         }
     }
@@ -141,7 +147,7 @@ public class PositionHandleCollider : MonoBehaviour
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(delta.x, 0, 0);
+            positionHandle.Position += new Vector3(delta.x, 0, 0);
             lastPos = pos;
         }
     }
@@ -161,7 +167,7 @@ public class PositionHandleCollider : MonoBehaviour
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(delta.x, delta.y, 0);
+            positionHandle.Position += new Vector3(delta.x, delta.y, 0);
             lastPos = pos;
         }
     }
@@ -181,7 +187,7 @@ public class PositionHandleCollider : MonoBehaviour
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(delta.x, 0, delta.z);
+            positionHandle.Position += new Vector3(delta.x, 0, delta.z);
             lastPos = pos;
         }
     }
@@ -201,7 +207,7 @@ public class PositionHandleCollider : MonoBehaviour
                 tracking = true;
             }
             delta = pos - lastPos;
-            positionHandle.transform.localPosition += new Vector3(0, delta.y, delta.z);
+            positionHandle.Position += new Vector3(0, delta.y, delta.z);
             lastPos = pos;
         }
     }

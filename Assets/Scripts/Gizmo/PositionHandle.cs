@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 
 [ExecuteInEditMode]
@@ -33,22 +34,47 @@ public class PositionHandle : MonoBehaviour
             if (_mouseDown && PositionHandleCollider != null)
             {
                 PositionHandleCollider.Moving = true;
+                VoxelManager.instance.selectedVoxels = VoxelManager.instance.voxels.Keys.ToList();
             }
             else if (!_mouseDown && PositionHandleCollider != null)
             {
                 PositionHandleCollider.Moving = false;
+                if (Offset != Vector3.zero)
+                {
+                    VoxelManager.instance.AddMoveCommand(Offset);
+                }
             }
+            Offset = Vector3Int.zero;
         }
     }
-    [SerializeField] Vector3 mousePosition, hitPosition;
-
+    Vector3Int _offset;
+    public Vector3Int Offset
+    {
+        get => _offset;
+        set
+        {
+            if (_offset != value)
+            {
+                VoxelManager.instance.TransformVoxels(_offset - value);
+            }
+            _offset = value;
+        }
+    }
     public Vector3 Position
     {
         get => positionHandleMesh.localPosition;
+        set
+        {
+            positionHandleMesh.transform.localPosition = value;
+        }
+    }
+    void OnEnable()
+    {
+        Position = Vector3.zero;
     }
     void FixedUpdate()
     {
-        if (VoxelManager.instance.selectMode)
+        if (VoxelManager.instance.SelectMode)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -67,8 +93,9 @@ public class PositionHandle : MonoBehaviour
                     PositionHandleCollider = null;
                 }
             }
-        }
-        
+            positionHandleMesh.transform.localScale = Vector3.Distance(transform.position, Camera.main.transform.position).Remap(0, 100, .5f, 10) * Vector3.one;  
+            Offset = new Vector3Int(Mathf.RoundToInt(Position.x), Mathf.RoundToInt(Position.y), Mathf.RoundToInt(Position.z)); 
+        }    
     }
     void Update()
     {
@@ -79,14 +106,14 @@ public class PositionHandle : MonoBehaviour
                 MouseDown = true;
             }
         }
-        if (Input.GetMouseButton(0))
-        {
-            //Debug.Log("Mouse Down");
-        }
         if (Input.GetMouseButtonUp(0))
         {
             MouseDown = false;
         }
-        //Debug.Log(mousePosition);
+    }
+
+    void Start()
+    {
+        gameObject.SetActive(false);
     }
 }

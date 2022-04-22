@@ -17,13 +17,14 @@ public class CommandManager
         commandPanel.ClearCommands();
     }
 
-    public void AddCommand(ICommand command)
+    public void AddCommand(ICommand command, bool execute = true)
     {
         if (index < commandList.Count)
             commandList.RemoveRange(index, commandList.Count - index);
 
         commandList.Add(command);
-        command.Execute();
+        if (execute) command.Execute();
+        
         commandPanel.AddCommand(command.Name, index);
         index++;
     }
