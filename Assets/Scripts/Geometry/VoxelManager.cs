@@ -417,7 +417,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     //     return voxels;
     // }
 
-    Vector3Int[] DrawLine(Vector3Int c0, Vector3Int c1)
+    Vector3Int[] DrawLineWalk(Vector3Int c0, Vector3Int c1)
     {
         // less function call
         List<Vector3Int> points = new List<Vector3Int>();
@@ -436,35 +436,37 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         return points.ToArray();
     }
-    Vector3Int[] DrawLineWalk(Vector3Int p0, Vector3Int p1)
+    Vector3Int[] DrawLine(Vector3Int p0, Vector3Int p1)
     {
-        // FAILS
+        // FAILS WALK
         int dx = p1.x - p0.x;
         int dy = p1.y - p0.y;
         int dz = p1.z - p0.z;
-        float nx = Mathf.Abs(dx);
-        float ny = Mathf.Abs(dy);
-        float nz = Mathf.Abs(dz);
+        int nx = Mathf.Abs(dx);
+        int ny = Mathf.Abs(dy);
+        int nz = Mathf.Abs(dz);
         int sign_x = dx > 0 ? 1 : -1;
         int sign_y = dy > 0 ? 1 : -1;
         int sign_z = dz > 0 ? 1 : -1;
 
         Vector3Int p = new Vector3Int(p0.x, p0.y, p0.z);
         List<Vector3Int> points = new List<Vector3Int>();
-        points.Add(new Vector3Int(p.x, p.y, p.z));
+        points.Add(p);
 
         int counter = 0;
 
-        for (float ix = 0, iy = 0, iz = 0; ix < nx || iy < ny || iz < nz;)
+        for (int ix = 0, iy = 0, iz = 0; ix < nx || iy < ny || iz < nz;)
         {
             counter++;
-            if ( (1 + 2 * ix) * ny < (1 + 2 * iy) * nx && (1 + 2 * ix) * nz < (1 + 2 * iz) * nx)
+            if ((.5f + ix) / nx < (.5f + iy) / ny && (.5f + ix) / nx < (.5f + iz) / nz)
             {
+                // if ( (1 + 2 * ix) * ny < (1 + 2 * iy) * nx && (1 + 2 * ix) * nz < (1 + 2 * iz) * nx)
                 p.x += sign_x;
                 ix += 1;
             }
-            else if ( (1 + 2 * iy) * nx < (1 + 2 * ix) * ny && (1 + 2 * iy) * nz < (1 + 2 * iz) * ny)
+            else if ((.5f + iy) / ny < (.5f + ix) / nx && (.5f + iy) / ny < (.5f + iz) / nz)
             {
+                // else if ( (1 + 2 * iy) * nx < (1 + 2 * ix) * ny && (1 + 2 * iy) * nz < (1 + 2 * iz) * ny)
                 p.y += sign_y;
                 iy += 1;
             }
