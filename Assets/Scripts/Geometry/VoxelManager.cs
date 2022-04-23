@@ -16,6 +16,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
     public PositionHandle positionHandle;
     public List<Vector3Int> selectedVoxels = new List<Vector3Int>();
+    public Dictionary<Vector3Int, float3> paintedVoxels = new Dictionary<Vector3Int, float3>();
     public float voxelSize;
     public GameObject gridPlane;
     bool _selectMode, _drawMode, _paintMode;
@@ -159,9 +160,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
         else if (PaintMode && !EventSystem.current.IsPointerOverGameObject())
         {
             SetCoordMouseHover();
+            if (Input.GetMouseButtonDown(0))
+            {
+                
+            }
             if (Input.GetMouseButton(0))
             {
                 TrySetVoxelColor();
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                commandManager.AddCommand(new CommandChangeColor(paintedVoxels.Keys.ToArray(), color, paintedVoxels.Values.ToArray()), false);
+                paintedVoxels.Clear();
             }
         }
     }
@@ -288,7 +298,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         if (voxels.TryGetValue(selectedCoord, out voxel) && selectedCoord != latestPaintCoord)
         {
             latestPaintCoord = voxel.coord;
-            Vector3Int[] coords = GrowSelectionCubic(voxel, DirectionStruct.NormalToDirection(placementNormal), brushSize);
+            Vector3Int[] coords = GrowSelectionCubic(voxel, DirectionStruct.NormalToDirection(placementNormal), brushSize, true);
             SetVoxelsColor(coords, color);
             // for (int i = 0; i < coords.Length; i++)
             // {
@@ -317,14 +327,26 @@ public class VoxelManager : MonoBehaviour, ISaveable
     {
         MoveVoxels(selectedVoxels.ToArray(), offset);
     }
-    public void SetVoxelColor(Vector3Int coord, Color aColor)
+    public void SetVoxelColor(Vector3Int coord, float3 aColor)
     {
         Voxel voxel;
         if (voxels.TryGetValue(coord, out voxel))
         {
-            voxel.color = new float3(aColor.r, aColor.g, aColor.b);
+            voxel.color = aColor;
             CreateMesh();
         }
+    }
+    public void SetVoxelColors(Vector3Int[] coords, float3[] colors)
+    {
+        Voxel voxel;
+        for (int i = 0; i < coords.Length; i++)
+        {
+            if (voxels.TryGetValue(coords[i], out voxel))
+            {
+                voxel.color = colors[i];
+            }
+        }
+        CreateMesh();
     }
     public void SetVoxelsColor(Vector3Int[] coords, Color aColor)
     {
@@ -414,50 +436,50 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         return points.ToArray();
     }
-    // Vector3Int[] DrawLineWalk(Vector3Int p0, Vector3Int p1)
-    // {
-    //     // FAILS
-    //     int dx = p1.x - p0.x;
-    //     int dy = p1.y - p0.y;
-    //     int dz = p1.z - p0.z;
-    //     float nx = Mathf.Abs(dx);
-    //     float ny = Mathf.Abs(dy);
-    //     float nz = Mathf.Abs(dz);
-    //     int sign_x = dx > 0 ? 1 : -1;
-    //     int sign_y = dy > 0 ? 1 : -1;
-    //     int sign_z = dz > 0 ? 1 : -1;
+    Vector3Int[] DrawLineWalk(Vector3Int p0, Vector3Int p1)
+    {
+        // FAILS
+        int dx = p1.x - p0.x;
+        int dy = p1.y - p0.y;
+        int dz = p1.z - p0.z;
+        float nx = Mathf.Abs(dx);
+        float ny = Mathf.Abs(dy);
+        float nz = Mathf.Abs(dz);
+        int sign_x = dx > 0 ? 1 : -1;
+        int sign_y = dy > 0 ? 1 : -1;
+        int sign_z = dz > 0 ? 1 : -1;
 
-    //     Vector3Int p = new Vector3Int(p0.x, p0.y, p0.z);
-    //     List<Vector3Int> points = new List<Vector3Int>();
-    //     points.Add(new Vector3Int(p.x, p.y, p.z));
+        Vector3Int p = new Vector3Int(p0.x, p0.y, p0.z);
+        List<Vector3Int> points = new List<Vector3Int>();
+        points.Add(new Vector3Int(p.x, p.y, p.z));
 
-    //     int counter = 0;
+        int counter = 0;
 
-    //     for (float ix = 0, iy = 0, iz = 0; ix < nx || iy < ny || iz < nz;)
-    //     {
-    //         counter++;
-    //         if ( (1 + 2 * ix) * ny < (1 + 2 * iy) * nx && (1 + 2 * ix) * nz < (1 + 2 * iz) * nx)
-    //         {
-    //             p.x += sign_x;
-    //             ix += 1;
-    //         }
-    //         else if ( (1 + 2 * iy) * nx < (1 + 2 * ix) * ny && (1 + 2 * iy) * nz < (1 + 2 * iz) * ny)
-    //         {
-    //             p.y += sign_y;
-    //             iy += 1;
-    //         }
-    //         else
-    //         {
-    //             p.z += sign_z;
-    //             iz += 1;
-    //         }
+        for (float ix = 0, iy = 0, iz = 0; ix < nx || iy < ny || iz < nz;)
+        {
+            counter++;
+            if ( (1 + 2 * ix) * ny < (1 + 2 * iy) * nx && (1 + 2 * ix) * nz < (1 + 2 * iz) * nx)
+            {
+                p.x += sign_x;
+                ix += 1;
+            }
+            else if ( (1 + 2 * iy) * nx < (1 + 2 * ix) * ny && (1 + 2 * iy) * nz < (1 + 2 * iz) * ny)
+            {
+                p.y += sign_y;
+                iy += 1;
+            }
+            else
+            {
+                p.z += sign_z;
+                iz += 1;
+            }
 
-    //         points.Add(new Vector3Int(p.x, p.y, p.z));
+            points.Add(new Vector3Int(p.x, p.y, p.z));
 
-    //         if (counter > 50) return points.ToArray();
-    //     }
-    //     return points.ToArray();
-    // }
+            if (counter > 50) return points.ToArray();
+        }
+        return points.ToArray();
+    }
     Vector3Int[] DrawLineInvert(Vector3Int c1, Vector3Int c2)
     {
         int n = DiagonalDistance(c1, c2);
@@ -502,19 +524,58 @@ public class VoxelManager : MonoBehaviour, ISaveable
         return selectVoxels.ToArray();
     }
 
-    Vector3Int[] GrowSelectionCubic(Voxel voxel, Direction direction, int steps)
+    Vector3Int[] GrowSelectionCubic(Voxel voxel, Direction direction, int steps, bool addToSelection = false)
     {
         List<Vector3Int> results = new List<Vector3Int>();
-        for (int x = -steps; x <= steps; x++)
+        int xMinStep = direction != Direction.XPos ? -steps : 0;
+        int xMaxStep = direction != Direction.XNeg ? steps : 0;
+        int yMinStep = direction != Direction.YPos ? -steps : 0;
+        int yMaxStep = direction != Direction.YNeg ? steps : 0;
+        int zMinStep = direction != Direction.ZPos ? -steps : 0;
+        int zMaxStep = direction != Direction.ZNeg ? steps : 0;
+        Vector3Int coord;
+        for (int x = xMinStep; x <= xMaxStep; x++)
         {
-            for (int y = -steps; y <= steps; y++)
+            for (int y = yMinStep; y <= yMaxStep; y++)
             {
-                for (int z = -steps; z <= steps; z++)
+                for (int z = zMinStep; z <= zMaxStep; z++)
                 {
-                    results.Add(new Vector3Int(voxel.coord.x + x, voxel.coord.y + y, voxel.coord.z + z));
+                    coord = new Vector3Int(voxel.coord.x + x, voxel.coord.y + y, voxel.coord.z + z);
+                    if (direction == Direction.XPos)
+                    {
+                        
+                    }
+                    results.Add(coord);
                 }
             }
         }
+
+        if (addToSelection)
+        {
+            for (int i = 0; i < results.Count; i++)
+            {
+                if (!paintedVoxels.ContainsKey(results[i]) && voxels.ContainsKey(results[i]))
+                {
+                    paintedVoxels.Add(results[i], voxels[results[i]].color);
+                }
+            }
+        }
+
+        //         for (int x = -steps; x <= steps; x++)
+        // {
+        //     for (int y = -steps; y <= steps; y++)
+        //     {
+        //         for (int z = -steps; z <= steps; z++)
+        //         {
+        //             coord = new Vector3Int(voxel.coord.x + x, voxel.coord.y + y, voxel.coord.z + z);
+        //             if (direction == Direction.XPos)
+        //             {
+                        
+        //             }
+        //             results.Add(coord);
+        //         }
+        //     }
+        // }
         return results.ToArray();
     }
 

@@ -5,14 +5,14 @@ using UnityEngine;
 
 public class CommandChangeColor : ICommand
 {
-    Vector3Int coord;
-    Color oldColor;
+    Vector3Int[] coords;
+    float3[] oldColors;
     Color newColor;
-    public CommandChangeColor(Vector3Int coord, Color newColor, Color oldColor)
+    public CommandChangeColor(Vector3Int[] coords, Color newColor, float3[] oldColors)
     {
-        this.coord = coord;
+        this.coords = coords;
         this.newColor = newColor;
-        this.oldColor = oldColor;
+        this.oldColors = oldColors;
     }
 
     static string _name = "Change Color";
@@ -20,11 +20,13 @@ public class CommandChangeColor : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.SetVoxelColor(coord, newColor);
+        VoxelManager.instance.SetVoxelsColor(coords, newColor);
     }
 
     public void Undo()
     {
-        VoxelManager.instance.SetVoxelColor(coord, oldColor);
+
+        VoxelManager.instance.SetVoxelColors(coords, oldColors);
+        
     }
 }

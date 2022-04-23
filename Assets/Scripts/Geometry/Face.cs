@@ -46,8 +46,8 @@ public struct DirectionStruct
 		Vector3Int.left,
 		Vector3Int.up,
 		Vector3Int.down,
-		Vector3Int.back,
-		Vector3Int.forward
+		Vector3Int.forward,
+		Vector3Int.back
 	};
 	public static readonly Direction[] Directions = new Direction[6]
 	{
@@ -154,9 +154,9 @@ public static class DirectionExtensions {
 			case Direction.YNeg:
 				return new Vector3Int(0,-1,0);
 			case Direction.ZPos:
-				return new Vector3Int(0,0,-1);
-			case Direction.ZNeg:
 				return new Vector3Int(0,0,1);
+			case Direction.ZNeg:
+				return new Vector3Int(0,0,-1);
 			default:
 				return new Vector3Int(0,0,0);
 		}
