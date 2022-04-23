@@ -7,19 +7,25 @@ namespace Geometry {
 
     public class Voxel
     {
-        public List<Voxel> Neighbours;
+        public Voxel[] neighbours = new Voxel[6];
         public Vector3Int coord;
         public float3 color;
-        public Voxel(List<Voxel> neighbours, Vector3Int coord, float3 color)
+        public Voxel(Vector3Int coord, float3 color)
         {
-            this.Neighbours = neighbours;
             this.coord = coord;
             this.color = color;
+
+            for (int i = 0; i < VoxelManager.instance.voxels.Count; i++)
+            {
+                if (true)
+                {
+                    
+                }
+            }
         }
 
         public Voxel(VoxelData data)
         {
-            this.Neighbours = new List<Voxel>();
             this.coord = data.coord;
             this.color = data.color;
         }
@@ -29,7 +35,7 @@ namespace Geometry {
             List<Face> faces = new List<Face>();
             for (int i = 0; i < DirectionStruct.Directions.Length; i++)
             {
-                if (GetNeighbour(coord + DirectionStruct.Directions[i].ToCoord()) is Voxel voxel)
+                if (neighbours[i] != null)
                 {
                     continue;
                 }
@@ -37,9 +43,17 @@ namespace Geometry {
             }
             return faces;
         }
-        public Voxel GetNeighbour(Vector3Int coord)
+        public Voxel GetNeighbour(Direction direction)
         {
-            return Neighbours.FirstOrDefault(x => x.coord == coord);
+            Voxel voxel;
+            VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Normals[(int)direction], out voxel);
+            return voxel;
+        }
+        public Voxel GetNeighbour(Vector3Int direction)
+        {
+            Voxel voxel;
+            VoxelManager.instance.voxels.TryGetValue(coord + direction, out voxel);
+            return voxel;
         }
     }
 

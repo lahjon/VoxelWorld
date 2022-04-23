@@ -18,11 +18,11 @@ public class CommandAdd : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.AddVoxel(placementCoord, color);
+        VoxelManager.instance.AddSingleVoxel(placementCoord, color);
     }
 
     public void Undo()
     {
-        VoxelManager.instance.RemoveVoxel(placementCoord);
+        VoxelManager.instance.RemoveSingleVoxel(placementCoord);
     }
 }

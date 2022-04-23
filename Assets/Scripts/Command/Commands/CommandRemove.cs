@@ -18,11 +18,11 @@ public class CommandRemove : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.RemoveVoxel(placementCoord);
+        VoxelManager.instance.RemoveSingleVoxel(placementCoord);
     }
 
     public void Undo()
     {
-        VoxelManager.instance.AddVoxel(placementCoord, color);
+        VoxelManager.instance.AddSingleVoxel(placementCoord, color);
     }
 }

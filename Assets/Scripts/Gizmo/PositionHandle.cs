@@ -31,20 +31,29 @@ public class PositionHandle : MonoBehaviour
         set
         {
             _mouseDown = value;
-            if (_mouseDown && PositionHandleCollider != null)
+            if (_mouseDown)
             {
-                PositionHandleCollider.Moving = true;
-                VoxelManager.instance.selectedVoxels = VoxelManager.instance.voxels.Keys.ToList();
-            }
-            else if (!_mouseDown && PositionHandleCollider != null)
-            {
-                PositionHandleCollider.Moving = false;
-                if (Offset != Vector3.zero)
+                if (PositionHandleCollider != null)
                 {
-                    VoxelManager.instance.AddMoveCommand(Offset);
+                    PositionHandleCollider.Moving = true;
+                    VoxelManager.instance.selectedVoxels = VoxelManager.instance.voxels.Keys.ToList();
                 }
             }
-            Offset = Vector3Int.zero;
+            else
+            {
+                if (PositionHandleCollider != null)
+                {
+                    PositionHandleCollider.Moving = false;
+                    if (_offset != Vector3.zero)
+                    {
+                        VoxelManager.instance.AddMoveCommand(Offset);
+                    }
+                }
+
+                VoxelManager.instance.selectedVoxels.Clear();
+                Position = Vector3.zero;
+                Offset = Vector3Int.zero;
+            }
         }
     }
     Vector3Int _offset;
@@ -53,9 +62,9 @@ public class PositionHandle : MonoBehaviour
         get => _offset;
         set
         {
-            if (_offset != value)
+            if (_offset != value && MouseDown)
             {
-                VoxelManager.instance.TransformVoxels(_offset - value);
+                VoxelManager.instance.TransformVoxels(-(_offset - value));
             }
             _offset = value;
         }
@@ -110,10 +119,5 @@ public class PositionHandle : MonoBehaviour
         {
             MouseDown = false;
         }
-    }
-
-    void Start()
-    {
-        gameObject.SetActive(false);
     }
 }

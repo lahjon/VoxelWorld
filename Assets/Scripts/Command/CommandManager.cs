@@ -40,7 +40,6 @@ public class CommandManager
         }
 
         commandPanel.UndoCommand(index);
-        //VoxelManager.instance.CreateMesh();
     }
 
     public void RedoCommand()

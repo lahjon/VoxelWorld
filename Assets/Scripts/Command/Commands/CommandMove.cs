@@ -10,7 +10,8 @@ public class CommandMove : ICommand
     public CommandMove(Vector3Int[] coords, Vector3Int offset)
     {
         this.coords = coords;
-        this.offset = offset;    }
+        this.offset = offset;    
+    }
 
     static string _name = "Move";
     public string Name { get =>  _name; }
