@@ -417,7 +417,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     //     return voxels;
     // }
 
-    Vector3Int[] DrawLineWalk(Vector3Int c0, Vector3Int c1)
+    Vector3Int[] DrawLine(Vector3Int c0, Vector3Int c1)
     {
         // less function call
         List<Vector3Int> points = new List<Vector3Int>();
@@ -436,7 +436,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         return points.ToArray();
     }
-    Vector3Int[] DrawLine(Vector3Int p0, Vector3Int p1)
+    Vector3Int[] DrawLineWalk(Vector3Int p0, Vector3Int p1)
     {
         // FAILS WALK
         int dx = p1.x - p0.x;
