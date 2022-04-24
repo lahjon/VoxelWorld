@@ -24,10 +24,10 @@ namespace Geometry
 public enum Direction
 {
 	XPos,
-	XNeg,
 	YPos,
-	YNeg,
 	ZPos,
+	XNeg,
+	YNeg,
 	ZNeg
 }
 
@@ -40,7 +40,7 @@ public enum GridAxis
 
 public struct DirectionStruct
 {
-	public static readonly Vector3Int[] Normals = new Vector3Int[6]
+	public static readonly Vector3Int[] Normals1 = new Vector3Int[6]
 	{
 		Vector3Int.right,
 		Vector3Int.left,
@@ -49,7 +49,16 @@ public struct DirectionStruct
 		Vector3Int.forward,
 		Vector3Int.back
 	};
-	public static readonly Direction[] Directions = new Direction[6]
+	public static readonly Vector3Int[] Normals = new Vector3Int[6]
+	{
+		Vector3Int.right,
+		Vector3Int.up,
+		Vector3Int.forward,
+		Vector3Int.left,
+		Vector3Int.down,
+		Vector3Int.back
+	};
+	public static readonly Direction[] Directions1 = new Direction[6]
 	{
 		Direction.XPos,
 		Direction.XNeg,
@@ -58,7 +67,7 @@ public struct DirectionStruct
 		Direction.ZPos,
 		Direction.ZNeg,
 	};
-	public static readonly Direction[] InvertDirections = new Direction[6]
+	public static readonly Direction[] Directions = new Direction[6]
 	{
 		Direction.XPos,
 		Direction.YPos,
@@ -264,19 +273,19 @@ public static class DirectionExtensions {
                 );
 			case Direction.ZPos:
 				return new Face(
-                    new float3(0f, 0f, 0f) + position, 
-                    new float3(0f, 1f, 0f) + position,
-                    new float3(1f, 1f, 0f) + position,
-                    new float3(1f, 0f, 0f) + position,
+                    new float3(0f, 0f, 1f) + position, 
+                    new float3(1f, 0f, 1f) + position,
+                    new float3(1f, 1f, 1f) + position,
+                    new float3(0f, 1f, 1f) + position,
                     direction,
 					color
                 );
 			case Direction.ZNeg:
 				return new Face(
-                    new float3(0f, 0f, 1f) + position, 
-                    new float3(1f, 0f, 1f) + position,
-                    new float3(1f, 1f, 1f) + position,
-                    new float3(0f, 1f, 1f) + position,
+                    new float3(0f, 0f, 0f) + position, 
+                    new float3(0f, 1f, 0f) + position,
+                    new float3(1f, 1f, 0f) + position,
+                    new float3(1f, 0f, 0f) + position,
                     direction,
 					color
                 );

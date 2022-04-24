@@ -17,12 +17,12 @@ namespace Geometry {
             Voxel voxel;
             //Voxel newNeighbour;
 
-            Debug.Log("My Coord: " + coord);
+            //Debug.Log("My Coord: " + coord);
             for (int i = 0; i < DirectionStruct.Normals.Length; i++)
             {
-                if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Normals[i], out voxel))
+                if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Directions[i].ToCoord(), out voxel))
                 {
-                    Debug.Log("Found Neighbour: " + voxel.coord);
+                    //Debug.Log("Found Neighbour: " + voxel.coord);
                     neighbours[i] = voxel;
                     voxel.neighbours[(6 + i + 3) % 6] = this;
                     //newNeighbour = GetNeighbour(DirectionStruct.Directions[i].Invert().ToCoord()); 

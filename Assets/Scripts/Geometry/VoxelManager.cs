@@ -180,7 +180,12 @@ public class VoxelManager : MonoBehaviour, ISaveable
             SetCoordMouseHover();
             if (Input.GetMouseButtonDown(0))
             {
-                
+                Voxel voxel;
+                if (voxels.TryGetValue(selectedCoord, out voxel))
+                {
+                    Debug.Log("Voxel: " + voxel.coord);
+                    voxel.neighbours.ToList().ForEach(x => Debug.Log("Neighbour: " + x));
+                }
             }
             if (Input.GetMouseButton(0))
             {
@@ -195,25 +200,25 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     void CreateMesh()
     {
-        var v = voxels.Values.ToArray();
-        for (int i = 0; i < v.Length; i++)
-        {
-            var coord = v[i].coord;
-            Debug.Log("Voxel: " + coord);
-            //Debug.Log("Neighbours: " + v[i].neighbours.ToArray().Where(x => x != null).Count());
-            //v[i].neighbours.ToList().ForEach(x => Debug.Log(x));
-            for (int x = 0; x < v.Length; x++)
-            {
-                foreach (var item in v[i].neighbours)
-                {
-                    if (item != null)
-                    {
-                        Debug.Log("Neighbour from" + coord + "at: " + item.coord);
-                        Debug.Log("Neighbour from" + coord + "at: " + x);
-                    }
-                }
-            }
-        }
+        // var v = voxels.Values.ToArray();
+        // for (int i = 0; i < v.Length; i++)
+        // {
+        //     var coord = v[i].coord;
+        //     Debug.Log("Voxel: " + coord);
+        //     //Debug.Log("Neighbours: " + v[i].neighbours.ToArray().Where(x => x != null).Count());
+        //     //v[i].neighbours.ToList().ForEach(x => Debug.Log(x));
+        //     for (int x = 0; x < v.Length; x++)
+        //     {
+        //         foreach (var item in v[i].neighbours)
+        //         {
+        //             if (item != null)
+        //             {
+        //                 Debug.Log("Neighbour from" + coord + "at: " + item.coord);
+        //                 Debug.Log("Neighbour from" + coord + "at: " + x);
+        //             }
+        //         }
+        //     }
+        // }
         
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
     }
@@ -319,27 +324,34 @@ public class VoxelManager : MonoBehaviour, ISaveable
         latestSelectedCoord = selectedCoord;
         if (latestAddedCoord != selectedCoord && !voxels.ContainsKey(placementCoord))
         {
-            //Debug.Log("Sucess");
             latestAddedCoord = placementCoord;
             latestPlacementCoord = placementCoord;
 
-            System.Action<List<Vector3Int>> callback = (results) =>
+            if (brushSize == 0)
             {
-                for (int i = 0; i < results.Count; i++)
+                VoxelManager.instance.AddSingleVoxel(placementCoord, color);
+            }
+            else
+            {
+                System.Action<List<Vector3Int>> callback = (results) =>
                 {
-                    if (!selectedVoxels.Contains(results[i]) && !voxels.ContainsKey(results[i]))
+                    for (int i = 0; i < results.Count; i++)
                     {
-                        selectedVoxels.Add(results[i]);
+                        if (!selectedVoxels.Contains(results[i]) && !voxels.ContainsKey(results[i]))
+                        {
+                            selectedVoxels.Add(results[i]);
+                        }
                     }
-                }
-            };
+                };
 
-            VoxelManager.instance.AddVoxels(
-                GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock, placementCoord.z), 
-                DirectionStruct.NormalToDirection(placementNormal), 
-                brushSize, 
-                callback), 
-                color);
+                VoxelManager.instance.AddVoxels(
+                    GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock, placementCoord.z), 
+                    DirectionStruct.NormalToDirection(placementNormal), 
+                    brushSize, 
+                    callback), 
+                    color);
+            }
+
         }
     }
     // void TryRemoveVoxels()
@@ -472,7 +484,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     {
         Voxel voxel;
         if (voxels.TryGetValue(coord, out voxel))
-        {
+        {            
             voxels.Remove(coord);
             voxel = null;
         }
