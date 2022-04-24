@@ -14,14 +14,34 @@ namespace Geometry {
         {
             this.coord = coord;
             this.color = color;
+            Voxel voxel;
+            //Voxel newNeighbour;
 
-            for (int i = 0; i < VoxelManager.instance.voxels.Count; i++)
+            Debug.Log("My Coord: " + coord);
+            for (int i = 0; i < DirectionStruct.Normals.Length; i++)
             {
-                if (true)
+                if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Normals[i], out voxel))
                 {
-                    
+                    Debug.Log("Found Neighbour: " + voxel.coord);
+                    neighbours[i] = voxel;
+                    voxel.neighbours[(6 + i + 3) % 6] = this;
+                    //newNeighbour = GetNeighbour(DirectionStruct.Directions[i].Invert().ToCoord()); 
                 }
             }
+            // for (int i = 0; i < 6; i++)
+            // {
+            //     if (neighbours[i] != null)
+            //     {
+            //         for (int v = 0; v < 6; v++)
+            //         {
+            //             if (neighbours[i].neighbours[v] != null)
+            //             {
+            //                 Debug.Log("N Neighbours: " + neighbours[i].neighbours[v].coord); 
+            //             }
+            //         }
+            //         Debug.Log("Neighbour: " + neighbours[i].coord); 
+            //     }
+            // }
         }
 
         public Voxel(VoxelData data)
@@ -33,7 +53,7 @@ namespace Geometry {
         public List<Face> GetFaces()
         {
             List<Face> faces = new List<Face>();
-            for (int i = 0; i < DirectionStruct.Directions.Length; i++)
+            for (int i = 0; i < 6; i++)
             {
                 if (neighbours[i] != null)
                 {

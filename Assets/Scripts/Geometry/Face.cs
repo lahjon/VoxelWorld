@@ -58,6 +58,15 @@ public struct DirectionStruct
 		Direction.ZPos,
 		Direction.ZNeg,
 	};
+	public static readonly Direction[] InvertDirections = new Direction[6]
+	{
+		Direction.XPos,
+		Direction.YPos,
+		Direction.ZPos,
+		Direction.XNeg,
+		Direction.YNeg,
+		Direction.ZNeg,
+	};
 	public static Direction NormalToDirection(Vector3Int normal)
 	{
 		for (int i = 0; i < Normals.Length; i++)

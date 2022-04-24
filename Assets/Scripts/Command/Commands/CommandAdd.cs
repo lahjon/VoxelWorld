@@ -5,11 +5,11 @@ using UnityEngine;
 
 public class CommandAdd : ICommand
 {
-    Vector3Int placementCoord;
+    Vector3Int[] coords;
     Color color;
-    public CommandAdd(Vector3Int placementCoord, Color color)
+    public CommandAdd(Vector3Int[] coords, Color color)
     {
-        this.placementCoord = placementCoord;
+        this.coords = coords;
         this.color = color;
     }
 
@@ -18,11 +18,11 @@ public class CommandAdd : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.AddSingleVoxel(placementCoord, color);
+        VoxelManager.instance.AddVoxels(coords, color);
     }
 
     public void Undo()
     {
-        VoxelManager.instance.RemoveSingleVoxel(placementCoord);
+        VoxelManager.instance.RemoveVoxels(coords);
     }
 }
