@@ -8,6 +8,10 @@ namespace Geometry {
     public class Voxel
     {
         public Voxel[] neighbours = new Voxel[6];
+        // public List<Voxel> neighbours = new List<Voxel>
+        // {
+        //     null, null, null, null, null, null
+        // };
         public Vector3Int coord;
         public float3 color;
         public Voxel(Vector3Int coord, float3 color)
@@ -15,9 +19,7 @@ namespace Geometry {
             this.coord = coord;
             this.color = color;
             Voxel voxel;
-            //Voxel newNeighbour;
 
-            //Debug.Log("My Coord: " + coord);
             for (int i = 0; i < DirectionStruct.Normals.Length; i++)
             {
                 if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Directions[i].ToCoord(), out voxel))
@@ -55,7 +57,7 @@ namespace Geometry {
             List<Face> faces = new List<Face>();
             for (int i = 0; i < 6; i++)
             {
-                if (neighbours[i] != null)
+                if (VoxelManager.instance.voxels.ContainsValue(neighbours[i]))
                 {
                     continue;
                 }

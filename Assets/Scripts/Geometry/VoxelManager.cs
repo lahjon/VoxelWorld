@@ -142,7 +142,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
             if (Input.GetMouseButtonUp(0))
             {
                 latestAddedCoord = null;
-                commandManager.AddCommand(new CommandAdd(selectedVoxels.ToArray(), color), false);
+                if (selectedVoxels.Count > 0)
+                {
+                    commandManager.AddCommand(new CommandAdd(selectedVoxels.ToArray(), color), false);
+                }
             }
 
             // MB2
@@ -330,6 +333,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             if (brushSize == 0)
             {
                 VoxelManager.instance.AddSingleVoxel(placementCoord, color);
+                selectedVoxels.Add(placementCoord);
             }
             else
             {
@@ -486,7 +490,10 @@ public class VoxelManager : MonoBehaviour, ISaveable
         if (voxels.TryGetValue(coord, out voxel))
         {            
             voxels.Remove(coord);
-            voxel = null;
+            // for (int i = 0; i < voxels[coord].neighbours.Length; i++)
+            // {
+            //     Debug.Log(voxel.neighbours[i]);
+            // }
         }
     }
     public void RemoveVoxels(Vector3Int[] removeVoxels)
