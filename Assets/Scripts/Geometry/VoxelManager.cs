@@ -65,6 +65,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             }
         }
     }
+    BoundsInt bounds;
 
     int _gridLevel;
     [SerializeField] int gridLevelMax = 50;
@@ -106,7 +107,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
             instance = this;
         }
         commandManager = new CommandManager(commandPanel);
-        Bounds bounds = new Bounds();
     }
 
     void Start()
@@ -114,6 +114,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         DrawMode = true;
         SelectMode = false;
         PaintMode = false;
+        bounds = new BoundsInt(Vector3Int.one * -14, Vector3Int.one * 14);
     }
     void Update()
     {
@@ -136,26 +137,25 @@ public class VoxelManager : MonoBehaviour, ISaveable
                 else
                 {
                     selectedVoxels.Clear();
-                    gridLevelLock = selectedCoord.y;
+                    gridLevelLock = placementCoord.y;
                     lockedPlacementNormal = placementNormal;
+                    NoKeys = true;
                 }
             }
 
             if (Input.GetMouseButton(0) && !(Input.GetKey(KeyCode.LeftControl)) && !(Input.GetKey(KeyCode.LeftShift)))
             {
-                // latestSelectedCoord = selectedCoord;
-                // latestAddedCoord = placementCoord;
-                // latestPlacementCoord = placementCoord;
                 TryAddVoxels();
             }
 
             if (Input.GetMouseButtonUp(0) )
             {
                 latestAddedCoord = null;
-                if (selectedVoxels.Count > 0)
+                if (NoKeys && selectedVoxels.Count > 0)
                 {
                     commandManager.AddCommand(new CommandAdd(selectedVoxels.ToArray(), color), false);
                 }
+                NoKeys = false;
             }
 
             // MB2
@@ -182,26 +182,13 @@ public class VoxelManager : MonoBehaviour, ISaveable
 
             if (Input.GetMouseButtonUp(2))
             {
-                if (selectedVoxels.Count > 0)
+                if (NoKeys && selectedVoxels.Count > 0)
                 {
                     commandManager.AddCommand(new CommandRemove(selectedVoxels.ToArray(), color), false);
                 }
                 NoKeys = false;
             }
 
-            // Keys
-            if (Input.GetKeyDown(KeyCode.I))
-            {
-                SampleColor();
-            }
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                TrySetVoxelColor();
-            }
-            if (Input.GetKeyDown(KeyCode.G))
-            {
-                TryFillColor();
-            }
 
             UpdateGridLevel();
         }
@@ -220,6 +207,19 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 commandManager.AddCommand(new CommandChangeColor(paintedVoxels.Keys.ToArray(), color, paintedVoxels.Values.ToArray()), false);
                 paintedVoxels.Clear();
+            }
+            // Keys
+            if (Input.GetKeyDown(KeyCode.I))
+            {
+                SampleColor();
+            }
+            if (Input.GetKeyDown(KeyCode.J))
+            {
+                TrySetVoxelColor();
+            }
+            if (Input.GetKeyDown(KeyCode.G))
+            {
+                TryFillColor();
             }
         }
     }
@@ -275,15 +275,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
             GridLevel--;
         }
     }
-
-    // void TryRemoveVoxel()
-    // {
-    //     latestSelectedCoord = selectedCoord;
-    //     if (voxels.ContainsKey(selectedCoord) && voxels[selectedCoord] is Voxel voxel)
-    //     {
-    //         commandManager.AddCommand(new CommandRemove(selectedCoord, new Color(voxel.color.x, voxel.color.y, voxel.color.z)));
-    //     }
-    // }
     void TryDrawLine()
     {
 
@@ -313,80 +304,31 @@ public class VoxelManager : MonoBehaviour, ISaveable
             commandManager.AddCommand(new CommandShrink(SelectInByNormal(voxels[selectedCoord], DirectionStruct.NormalToDirection(placementNormal)), color));
         }
     }
-    // void TryAddVoxel()
-    // {
-    //     latestSelectedCoord = selectedCoord;
-    //     if (latestAddedCoord != selectedCoord && !voxels.ContainsKey(placementCoord))
-    //     {
-    //         latestAddedCoord = placementCoord;
-    //         latestPlacementCoord = placementCoord;
-    //     }
-    // }
-
     void TryRemoveVoxels()
     {
         VoxelManager.instance.RemoveVoxels(
                     GrowSelectionCubic(new Vector3Int(selectedCoord.x, gridLevelLock, selectedCoord.z),
                     DirectionStruct.NormalToDirection(lockedPlacementNormal),
                     brushSize));
-            // if (brushSize == 0)
-            // {
-            //     VoxelManager.instance.RemoveSingleVoxel(selectedCoord);
-            //     selectedVoxels.Add(selectedCoord);
-            // }
-            // else
-            // {
-            //     VoxelManager.instance.RemoveVoxels(
-            //         GrowSelectionCubic(new Vector3Int(selectedCoord.x, gridLevelLock, selectedCoord.z),
-            //         DirectionStruct.NormalToDirection(lockedPlacementNormal),
-            //         brushSize));
-            // }
     }
 
     void TryAddVoxels()
     {
-        // VoxelManager.instance.AddVoxels(
-        //     GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock, placementCoord.z), 
-        //     DirectionStruct.NormalToDirection(placementNormal), 
-        //     brushSize,
-        //     0), 
-        //     color);
         latestSelectedCoord = selectedCoord;
         if (latestAddedCoord != selectedCoord && !voxels.ContainsKey(placementCoord))
         {
             latestAddedCoord = placementCoord;
             latestPlacementCoord = placementCoord;
 
-            // if (brushSize == 0)
-            // {
-                VoxelManager.instance.AddVoxels(
-                    GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock + 1, placementCoord.z), 
-                    DirectionStruct.NormalToDirection(lockedPlacementNormal), 
-                    brushSize,
-                    0), 
-                    color);
-            // }
-            // else
-            // {
-            //     VoxelManager.instance.AddVoxels(
-            //         GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock, placementCoord.z), 
-            //         DirectionStruct.NormalToDirection(placementNormal), 
-            //         brushSize,
-            //         0), 
-            //         color);
-            // }
+            VoxelManager.instance.AddVoxels(
+                GrowSelectionCubic(new Vector3Int(placementCoord.x, gridLevelLock, placementCoord.z), 
+                DirectionStruct.NormalToDirection(lockedPlacementNormal), 
+                brushSize,
+                0), 
+                color);
 
         }
     }
-    // void TryRemoveVoxels()
-    // {
-    //     if (latestRemoveCoord != placementCoord && voxels.ContainsKey(selectedCoord))
-    //     {
-    //         latestRemoveCoord = selectedCoord;
-    //         latestPlacementCoord = selectedCoord;
-    //         commandManager.AddCommand(new CommandRemove(selectedCoord, color));
-    //     }
-    // }
     void TryGrowVoxels()
     {
         if (voxels.ContainsKey(selectedCoord))
@@ -466,13 +408,17 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     Voxel AddVoxel(Vector3Int coord, Color aColor)
     {
-        if (!voxels.ContainsKey(coord))
+        if (!voxels.ContainsKey(coord) && InBounds(coord))
         {
             Voxel voxel = new Voxel(coord, new float3(aColor.r, aColor.g, aColor.b));
             voxels.Add(coord, voxel);
             return voxel;
         }
         return null;
+    }
+    bool InBounds(Vector3Int coord)
+    {
+        return coord.x >= bounds.min.x && coord.y >= bounds.min.y && coord.z >= bounds.min.z && coord.x < bounds.max.x && coord.y < bounds.max.y && coord.z < bounds.max.z;
     }
     public void AddVoxels(Vector3Int[] addVoxels, Color aColor)
     {
@@ -514,23 +460,9 @@ public class VoxelManager : MonoBehaviour, ISaveable
         {
             RemoveVoxel(removeVoxels[i]);
         }
-        // for (int i = 0; i < removed.Count; i++)
-        // {
-        //     removed[i].UpdateNeighbours();
-        // }
         CreateMesh();
     }
-    // Vector3Int[] DrawLine(Vector3Int c1, Vector3Int c2)
-    // {
-    //     int n = DiagonalDistance(c1, c2);
-    //     Vector3Int[] voxels = new Vector3Int[n + 1];
-    //     for (int i = 0; i <= n; i++)
-    //     {
-    //         float t = n == 0 ? 0f : (float)i / n;
-    //         voxels[i] = (RoundCoord(Vector3.Lerp(c1, c2, t)));
-    //     }
-    //     return voxels;
-    // }
+
 
     Vector3Int[] DrawLine(Vector3Int c0, Vector3Int c1)
     {
@@ -620,26 +552,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         CreateMesh();
     }
-    // Vector3Int[] GrowSelectionCubic1(Voxel voxel, Direction direction, int steps)
-    // {
-    //     HashSet<Vector3Int> selectVoxels = new HashSet<Vector3Int>();
-    //     List<Vector3Int> outerVoxels = new List<Vector3Int>();
-    //     selectVoxels.Add(voxel.coord);
-    //     outerVoxels.Add(voxel.coord);
-
-    //     Direction[] directions = new Direction[5];
-    //     int index = 0;
-    //     for (int i = 0; i < DirectionStruct.Directions.Length; i++)
-    //     {
-    //         if (DirectionStruct.Directions[i] == direction.Invert())
-    //         {
-    //             continue;
-    //         }
-    //         directions[index] = DirectionStruct.Directions[i];
-    //         index++;
-    //     }
-    //     return selectVoxels.ToArray();
-    // }
 
     Vector3Int[] GrowSelectionCubic(Vector3Int aCoord, Direction direction, int steps, int operation)
     {
@@ -671,15 +583,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         {
             selectedVoxels.UnionWith(results);
         }
-        // else if (operation == 1)
-        // {
-        //     results.UnionWith(paintedVoxels.Keys);
-        //     for (int i = 0; i < results.Count; i++)
-        //     {
-        //         paintedVoxels.Add(results[i], voxels[results[i]].color);
-        //     }
 
-        // }
         return results.ToArray();
     }
 
@@ -737,38 +641,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
         return selectedVoxels.ToArray();
     }
 
-
-    // Vector3Int[] GrowSelectionCubic(Vector3Int aCoord, int steps)
-    // {
-    //     // used for remove
-    //     List<Vector3Int> results = new List<Vector3Int>();
-    //     int xMinStep = -steps;
-    //     int xMaxStep = steps;
-    //     int yMinStep = -steps;
-    //     int yMaxStep = steps;
-    //     int zMinStep = -steps;
-    //     int zMaxStep = steps;
-    //     Vector3Int coord;
-    //     for (int x = xMinStep; x <= xMaxStep; x++)
-    //     {
-    //         for (int y = yMinStep; y <= yMaxStep; y++)
-    //         {
-    //             for (int z = zMinStep; z <= zMaxStep; z++)
-    //             {
-    //                 coord = new Vector3Int(aCoord.x + x, aCoord.y + y, aCoord.z + z);
-    //                 results.Add(coord);
-    //             }
-    //         }
-    //     }
-
-
-    //     selectedVoxels.ExceptWith(results);
-        
-    //     return results.ToArray();
-    // }
-
-
-
     List<Vector3Int> GetCoords(Vector3Int coord, Direction direction, Direction[] directions)
     {
         List<Vector3Int> coords = new List<Vector3Int>();
@@ -791,7 +663,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 if (GetVoxelByCoord(searchVoxels[0].coord + directions[i].ToCoord()) is Voxel aVoxel && !extrudeVoxels.Contains(aVoxel.coord + direction.ToCoord()))
                 {
-                    if (aVoxel.GetNeighbour(placementNormal) == null)
+                    if (GetVoxelByCoord(aVoxel.coord + placementNormal) == null)
                     {
                         extrudeVoxels.Add(aVoxel.coord + direction.ToCoord());
                         searchVoxels.Add(aVoxel);
@@ -816,7 +688,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             {
                 if (GetVoxelByCoord(searchVoxels[0].coord + directions[i].ToCoord()) is Voxel aVoxel && !removeVoxels.Contains(aVoxel.coord))
                 {
-                    if (aVoxel.GetNeighbour(aVoxel.coord + placementNormal) == null)
+                    if (GetVoxelByCoord(aVoxel.coord + placementNormal) == null)
                     {
                         removeVoxels.Add(aVoxel.coord);
                         searchVoxels.Add(aVoxel);
@@ -860,29 +732,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #endregion
 
     #region voxels
-    // public Voxel GetNeighbour(Vector3Int coord, Direction direction)
-    // {
-    //     if (voxels.ContainsKey(coord + direction.ToCoord()) && voxels[coord + direction.ToCoord()] is Voxel voxel)
-    //         return voxel;
-    //     else
-    //         return null;
-    // }   
-    // public List<Voxel> GetAllNeighbours(Vector3Int coord, bool add)
-    // {
-    //     List<Voxel> neighbours = new List<Voxel>();
-
-    //     for (int i = 0; i < DirectionStruct.Directions .Length; i++)
-    //     {
-    //         if (GetNeighbour(coord, DirectionStruct.Directions[i]) is Voxel voxel)
-    //         {
-    //             if (add)
-    //             {
-    //                 voxel.neighbours.Add(voxels[coord]);
-    //             }
-    //             neighbours.Add(voxel);            }
-    //     }   
-    //     return neighbours;
-    // }
     Voxel GetVoxelByCoord(Vector3Int coord)
     {
         if (voxels.ContainsKey(coord) && voxels[coord] is Voxel voxel)
@@ -968,34 +817,3 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     #endregion
 }
-
-// public void ButtonRedo()
-// {
-//     commandManager.RedoCommand();
-
-
-
-//     var key = voxels.Keys.ToArray()[0];
-//     Voxel voxel;
-//     bool test;
-//     Stopwatch stopwatch = new Stopwatch();
-
-
-//     stopwatch.Start();
-//     for (int i = 0; i < 1000000; i++)
-//     {
-//         test = false | true;
-//     }
-//     stopwatch.Stop();
-//     UnityEngine.Debug.Log("ContainsKey: " + stopwatch.Elapsed);
-
-//     stopwatch.Reset();
-
-//     stopwatch.Start();
-//     for (int i = 0; i < 1000000; i++)
-//     {
-//         test = false || true;
-//     }
-//     stopwatch.Stop();
-//     UnityEngine.Debug.Log("TryGetValue: " + stopwatch.Elapsed);
-// }
