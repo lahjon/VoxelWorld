@@ -5,11 +5,11 @@ using UnityEngine;
 
 public class CommandRemove : ICommand
 {
-    Vector3Int placementCoord;
+    Vector3Int[] coords;
     Color color;
-    public CommandRemove(Vector3Int placementCoord, Color color)
+    public CommandRemove(Vector3Int[] coords, Color color)
     {
-        this.placementCoord = placementCoord;
+        this.coords = coords;
         this.color = color;
     }
 
@@ -18,11 +18,11 @@ public class CommandRemove : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.RemoveSingleVoxel(placementCoord);
+        VoxelManager.instance.RemoveVoxels(coords);
     }
 
     public void Undo()
     {
-        VoxelManager.instance.AddSingleVoxel(placementCoord, color);
+        VoxelManager.instance.AddVoxels(coords, color);
     }
 }

@@ -8,10 +8,6 @@ namespace Geometry {
     public class Voxel
     {
         public Voxel[] neighbours = new Voxel[6];
-        // public List<Voxel> neighbours = new List<Voxel>
-        // {
-        //     null, null, null, null, null, null
-        // };
         public Vector3Int coord;
         public float3 color;
         public Voxel(Vector3Int coord, float3 color)
@@ -24,26 +20,10 @@ namespace Geometry {
             {
                 if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Directions[i].ToCoord(), out voxel))
                 {
-                    //Debug.Log("Found Neighbour: " + voxel.coord);
                     neighbours[i] = voxel;
                     voxel.neighbours[(6 + i + 3) % 6] = this;
-                    //newNeighbour = GetNeighbour(DirectionStruct.Directions[i].Invert().ToCoord()); 
                 }
             }
-            // for (int i = 0; i < 6; i++)
-            // {
-            //     if (neighbours[i] != null)
-            //     {
-            //         for (int v = 0; v < 6; v++)
-            //         {
-            //             if (neighbours[i].neighbours[v] != null)
-            //             {
-            //                 Debug.Log("N Neighbours: " + neighbours[i].neighbours[v].coord); 
-            //             }
-            //         }
-            //         Debug.Log("Neighbour: " + neighbours[i].coord); 
-            //     }
-            // }
         }
 
         public Voxel(VoxelData data)
@@ -57,7 +37,7 @@ namespace Geometry {
             List<Face> faces = new List<Face>();
             for (int i = 0; i < 6; i++)
             {
-                if (VoxelManager.instance.voxels.ContainsValue(neighbours[i]))
+                if (neighbours[i] != null)
                 {
                     continue;
                 }
@@ -65,12 +45,24 @@ namespace Geometry {
             }
             return faces;
         }
-        public Voxel GetNeighbour(Direction direction)
-        {
-            Voxel voxel;
-            VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Normals[(int)direction], out voxel);
-            return voxel;
-        }
+
+        // public void UpdateNeighbours()
+        // {
+        //     for (int i = 0; i < neighbours.Length; i++)
+        //     {
+        //         if (!VoxelManager.instance.voxels.ContainsKey(neighbours[i].coord))
+        //         {
+        //             neighbours[i] = null;
+        //         }
+        //     }
+        // }
+
+        // public Voxel GetNeighbour(Direction direction)
+        // {
+        //     Voxel voxel;
+        //     VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Normals[(int)direction], out voxel);
+        //     return voxel;
+        // }
         public Voxel GetNeighbour(Vector3Int direction)
         {
             Voxel voxel;
