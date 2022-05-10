@@ -12,10 +12,10 @@ namespace Geometry
 		public float3 color;
         public Face(int direction, float3 position, float3 color)
         {
-            this.x = FaceDirections[direction][0] + position;
-            this.y = FaceDirections[direction][1] + position;
-            this.w = FaceDirections[direction][2] + position;
-            this.z = FaceDirections[direction][3] + position;
+            this.x = (FaceDirections[direction][0] + position) * VoxelManager.instance.VoxelSize;
+            this.y = (FaceDirections[direction][1] + position) * VoxelManager.instance.VoxelSize;
+            this.w = (FaceDirections[direction][2] + position) * VoxelManager.instance.VoxelSize;
+            this.z = (FaceDirections[direction][3] + position) * VoxelManager.instance.VoxelSize;
             this.direction = direction;
 			this.color = color;
         }

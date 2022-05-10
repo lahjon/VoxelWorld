@@ -20,9 +20,22 @@ public class VoxelManager : MonoBehaviour, ISaveable
     List<List<Vector3Int>> Brushes = new List<List<Vector3Int>>();
     public PositionHandle positionHandle;
     public List<Vector3Int> selectedVoxels = new List<Vector3Int>();
-    public Dictionary<Vector3Int, float3> paintedVoxels = new Dictionary<Vector3Int, float3>();
-    public float voxelSize;
-    public TMP_Text brushSizeText;
+    public List<float3> paintVoxelsColor = new List<float3>();
+    public List<Vector3Int> paintVoxels = new List<Vector3Int>();
+    int _voxelSize = 1;
+    public int VoxelSize
+    {
+        get => _voxelSize;
+        set
+        {
+            _voxelSize = value;
+            bounds.min = Vector3Int.one * (-gridLevelMax / 2) / VoxelSize;
+            bounds.max = Vector3Int.one * (gridLevelMax / 2) / VoxelSize;
+
+            //new BoundsInt(Vector3Int.one * -14 / VoxelSize, Vector3Int.one * 14 / VoxelSize);
+        }
+    }
+    public TMP_Text brushSizeText, voxelSizeText;
     public GameObject gridPlane;
     public LayerMask lm, lme;
     
@@ -103,7 +116,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public ColorWheel colorWheel;
     public Palette palette;
     public int brushSize;
-    public Slider brushSlider;
+    public Slider brushSlider, voxelSlider;
     public static VoxelManager instance;
     #region standard
     void Awake()
@@ -120,7 +133,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         DrawMode = true;
         SelectMode = false;
         PaintMode = false;
-        bounds = new BoundsInt(Vector3Int.one * -14, Vector3Int.one * 14);
+        bounds = new BoundsInt(Vector3Int.one * (-gridLevelMax / 2) / VoxelSize, Vector3Int.one * (gridLevelMax / 2) / VoxelSize);
         BuildBrushSizes();
     }
     void Update()
@@ -217,18 +230,19 @@ public class VoxelManager : MonoBehaviour, ISaveable
             }
             if (Input.GetMouseButtonUp(0))
             {
-                commandManager.AddCommand(new CommandChangeColor(paintedVoxels.Keys.ToList(), color, paintedVoxels.Values.ToList()), false);
-                paintedVoxels.Clear();
+                commandManager.AddCommand(new CommandChangeColor(paintVoxels, color, paintVoxelsColor), false);
+                paintVoxels.Clear();
+                paintVoxelsColor.Clear();
             }
             // Keys
             if (Input.GetKeyDown(KeyCode.I))
             {
                 SampleColor();
             }
-            if (Input.GetKeyDown(KeyCode.J))
-            {
-                TrySetVoxelColor();
-            }
+            // if (Input.GetKeyDown(KeyCode.J))
+            // {
+            //     TrySetVoxelColor();
+            // }
             if (Input.GetKeyDown(KeyCode.G))
             {
                 TryFillColor();
@@ -256,6 +270,11 @@ public class VoxelManager : MonoBehaviour, ISaveable
     {
         brushSize = (int)brushSlider.value;
         brushSizeText.text = ((int)brushSlider.value + 1).ToString();
+    }
+    public void UpdateVoxelSize()
+    {
+        VoxelSize = (int)voxelSlider.value;
+        voxelSizeText.text = ((int)voxelSlider.value).ToString();
     }
     public void ButtonClear()
     {
@@ -374,9 +393,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         if (voxels.TryGetValue(selectedCoord, out voxel) && selectedCoord != latestPaintCoord)
         {
             latestPaintCoord = voxel.coord;
-
-            List<Vector3Int> coords = GrowSelectionCubicPaint(voxel.coord, placementNormal, brushSize);
-            SetVoxelsColor(coords, color);
+            SetVoxelsColor(GetBrush(voxel.coord), color);
         }
     }
 
@@ -427,6 +444,8 @@ public class VoxelManager : MonoBehaviour, ISaveable
         {
             if (voxels.TryGetValue(coords[i], out voxel))
             {
+                paintVoxelsColor.Add(voxel.color);
+                paintVoxels.Add(voxel.coord);
                 voxel.color = aColor;
             }
         }
@@ -695,32 +714,32 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
     }
 
-    List<Vector3Int>  GrowSelectionCubicPaint(Vector3Int aCoord, Vector3Int direction, int steps)
-    {
-        // used for paint
-        int xMinStep = direction != DirectionStruct.Normals[0] ? -steps : 0;
-        int xMaxStep = direction != DirectionStruct.Normals[3] ? steps : 0;
-        int yMinStep = direction != DirectionStruct.Normals[1] ? -steps : 0;
-        int yMaxStep = direction != DirectionStruct.Normals[4] ? steps : 0;
-        int zMinStep = direction != DirectionStruct.Normals[2] ? -steps : 0;
-        int zMaxStep = direction != DirectionStruct.Normals[5] ? steps : 0;
-        Vector3Int coord;
-        for (int x = xMinStep; x <= xMaxStep; x++)
-        {
-            for (int y = yMinStep; y <= yMaxStep; y++)
-            {
-                for (int z = zMinStep; z <= zMaxStep; z++)
-                {
-                    coord = new Vector3Int(aCoord.x + x, aCoord.y + y, aCoord.z + z);
-                    if (voxels.ContainsKey(coord) && !paintedVoxels.ContainsKey(coord))
-                    {
-                        paintedVoxels.Add(coord, voxels[coord].color);
-                    }
-                }
-            }
-        }
-        return paintedVoxels.Keys.ToList();
-    }
+    // List<Vector3Int>  GrowSelectionCubicPaint(Vector3Int aCoord, Vector3Int direction, int steps)
+    // {
+    //     // used for paint
+    //     int xMinStep = direction != DirectionStruct.Normals[0] ? -steps : 0;
+    //     int xMaxStep = direction != DirectionStruct.Normals[3] ? steps : 0;
+    //     int yMinStep = direction != DirectionStruct.Normals[1] ? -steps : 0;
+    //     int yMaxStep = direction != DirectionStruct.Normals[4] ? steps : 0;
+    //     int zMinStep = direction != DirectionStruct.Normals[2] ? -steps : 0;
+    //     int zMaxStep = direction != DirectionStruct.Normals[5] ? steps : 0;
+    //     Vector3Int coord;
+    //     for (int x = xMinStep; x <= xMaxStep; x++)
+    //     {
+    //         for (int y = yMinStep; y <= yMaxStep; y++)
+    //         {
+    //             for (int z = zMinStep; z <= zMaxStep; z++)
+    //             {
+    //                 coord = new Vector3Int(aCoord.x + x, aCoord.y + y, aCoord.z + z);
+    //                 if (voxels.ContainsKey(coord) && !paintedVoxels.ContainsKey(coord))
+    //                 {
+    //                     paintedVoxels.Add(coord, voxels[coord].color);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     return paintedVoxels.Keys.ToList();
+    // }
 
     // List<Vector3Int> GrowSelectionCubic(Vector3Int aCoord, Direction direction, int steps)
     // {
@@ -866,29 +885,31 @@ public class VoxelManager : MonoBehaviour, ISaveable
         {
             Vector3Int normal = Vector3Int.FloorToInt(hit.normal);
             Vector3Int offsetCoord = new Vector3Int(hit.normal == Vector3.right ? 1 : 0, hit.normal == Vector3.up ? 1 : 0, hit.normal == Vector3.forward ? 1 : 0);
-            Vector3Int selCoord = Vector3Int.FloorToInt(hit.point) - offsetCoord;
+            Vector3Int selCoord = Vector3Int.FloorToInt(hit.point / VoxelSize) - offsetCoord;
 
             if (hit.normal == Vector3.up || hit.normal == Vector3.down)
             {
-                selCoord.y = Mathf.RoundToInt(hit.point.y) - offsetCoord.y;
+                selCoord.y = Mathf.RoundToInt(hit.point.y / VoxelSize) - offsetCoord.y;
             }
             else if (hit.normal == Vector3.left || hit.normal == Vector3.right)
             {
-                selCoord.x = Mathf.RoundToInt(hit.point.x) - offsetCoord.x;
+                selCoord.x = Mathf.RoundToInt(hit.point.x / VoxelSize) - offsetCoord.x;
             }
             else
             {
-                selCoord.z = Mathf.RoundToInt(hit.point.z) - offsetCoord.z;
+                selCoord.z = Mathf.RoundToInt(hit.point.z / VoxelSize) - offsetCoord.z;
             }
 
             placementNormal = normal;
-            placementCoord = selCoord + normal;
-            selectedCoord = selCoord;
+            placementCoord = (selCoord + normal);
+            selectedCoord = selCoord ;
+            Debug.Log(selectedCoord);
+            Debug.Log(placementCoord);
         }
         else if (plane.Raycast(ray, out distance))
         {
             Vector3 pos = ray.GetPoint(distance);
-            placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x), GridLevel, Mathf.FloorToInt(pos.z));
+            placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x / VoxelSize), GridLevel, Mathf.FloorToInt(pos.z / VoxelSize));
             selectedCoord = placementCoord;
             placementNormal = Vector3Int.up;
         }
