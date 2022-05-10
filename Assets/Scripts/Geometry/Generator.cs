@@ -25,6 +25,24 @@ namespace Geometry.Generators {
 		public int FaceAmount{get; set;}
         public int VertexCount => 4 * FaceAmount;
 		public int IndexCount => 6 * FaceAmount;
+		public static readonly float4[] Tangents = new float4[6]
+		{
+			new float4(0f,0f,1f, 1f),
+			new float4(-1f,0f,0f, 1f),
+			new float4(0f,1f,0f, -1f),
+			new float4(0f,0f,-1f, -1f),
+			new float4(1f,0f,0f, -1f),
+			new float4(0f,-1f,0f, 1f)
+		};
+		public static readonly float3[] FNormals = new float3[6]
+		{
+			new float3(1,0,0),
+			new float3(0,1,0),
+			new float3(0,0,1),
+			new float3(-1,0,0),
+			new float3(0,-1,0),
+			new float3(0,0,-1)
+		};
 		public int JobLength => 1;
 		[ReadOnly]
         NativeArray<Face> faces;
@@ -35,15 +53,12 @@ namespace Geometry.Generators {
 			Vertex vertex = new Vertex();
 			int v0, v1, v2, v3 = 0;
 
-			// // TEST
-			// int[] neighbours = new int[20];
-			// neighbours[0] =1;
-
 			for (int i = 0; i < FaceAmount; i++)
 			{
 				vertex.color = Faces[i].color;
-				vertex.tangent = Faces[i].direction.ToTangent();
-				vertex.normal = Faces[i].direction.FloatToNormal();
+				
+				vertex.tangent = Tangents[Faces[i].direction];
+				vertex.normal = FNormals[Faces[i].direction];
 
 				vertex.position = Faces[i].x;
 				v0 = i * 4;
