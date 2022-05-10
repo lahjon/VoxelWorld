@@ -58,15 +58,6 @@ public struct DirectionStruct
 		Vector3Int.down,
 		Vector3Int.back
 	};
-	public static readonly Direction[] Directions1 = new Direction[6]
-	{
-		Direction.XPos,
-		Direction.XNeg,
-		Direction.YPos,
-		Direction.YNeg,
-		Direction.ZPos,
-		Direction.ZNeg,
-	};
 	public static readonly Direction[] Directions = new Direction[6]
 	{
 		Direction.XPos,

@@ -5,10 +5,10 @@ using UnityEngine;
 
 public class CommandFillColor : ICommand
 {
-    Vector3Int[] coords;
-    Color oldColor;
-    Color newColor;
-    public CommandFillColor(Vector3Int[] coords, Color newColor, Color oldColor)
+    List<Vector3Int> coords;
+    float3 oldColor;
+    float3 newColor;
+    public CommandFillColor(List<Vector3Int> coords, float3 newColor, float3 oldColor)
     {
         this.coords = coords;
         this.newColor = newColor;

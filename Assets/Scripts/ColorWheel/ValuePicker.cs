@@ -4,7 +4,7 @@ using UnityEditor;
 using System.Collections.Generic;
 using UnityEngine.UI;
 using System.Collections;
-
+using Unity.Mathematics;
 
 public class ValuePicker : MonoBehaviour
 {
@@ -17,7 +17,7 @@ public class ValuePicker : MonoBehaviour
         {
             _color = value;
             showColorImage.color = Color;
-            VoxelManager.color = Color;
+            VoxelManager.color = new float3(Color.r, Color.g, Color.b);
         }
     }
     Slider slider;

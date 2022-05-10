@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandShrink : ICommand
 {
-    Vector3Int[] coords;
-    Color color;
-    public CommandShrink(Vector3Int[] coords, Color color)
+    List<Vector3Int> coords;
+    float3 color;
+    public CommandShrink(List<Vector3Int> coords, float3 color)
     {
         this.coords = coords;
         this.color = color;

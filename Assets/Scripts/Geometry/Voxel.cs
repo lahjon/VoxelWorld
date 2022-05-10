@@ -10,7 +10,7 @@ namespace Geometry {
         public Voxel[] neighbours = new Voxel[6];
         public Vector3Int coord;
         public float3 color;
-        public Voxel(Vector3Int coord, float3 color)
+        public Voxel(Vector3Int coord, float3 color, Dictionary<Vector3Int, Voxel> owner)
         {
             this.coord = coord;
             this.color = color;
@@ -18,7 +18,7 @@ namespace Geometry {
 
             for (int i = 0; i < DirectionStruct.Normals.Length; i++)
             {
-                if (VoxelManager.instance.voxels.TryGetValue(coord + DirectionStruct.Directions[i].ToCoord(), out voxel))
+                if (owner.TryGetValue(coord + DirectionStruct.Normals[i], out voxel))
                 {
                     neighbours[i] = voxel;
                     voxel.neighbours[(6 + i + 3) % 6] = this;
@@ -26,10 +26,20 @@ namespace Geometry {
             }
         }
 
-        public Voxel(VoxelData data)
+        public Voxel(VoxelData data, Dictionary<Vector3Int, Voxel> owner)
         {
             this.coord = data.coord;
             this.color = data.color;
+            Voxel voxel;
+            
+            for (int i = 0; i < DirectionStruct.Normals.Length; i++)
+            {
+                if (owner.TryGetValue(coord + DirectionStruct.Normals[i], out voxel))
+                {
+                    neighbours[i] = voxel;
+                    voxel.neighbours[(6 + i + 3) % 6] = this;
+                }
+            }
         }
 
         public List<Face> GetFaces()

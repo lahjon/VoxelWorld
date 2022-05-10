@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandGrow : ICommand
 {
-    Vector3Int[] coords;
-    Color color;
-    public CommandGrow(Vector3Int[] coords, Color color)
+    List<Vector3Int> coords;
+    float3 color;
+    public CommandGrow(List<Vector3Int> coords, float3 color)
     {
         this.coords = coords;
         this.color = color;

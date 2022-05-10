@@ -37,7 +37,7 @@ public class PositionHandle : MonoBehaviour
                 {
                     PositionHandleCollider.Moving = true;
                     VoxelManager.instance.selectedVoxels.Clear();
-                    VoxelManager.instance.selectedVoxels.UnionWith(VoxelManager.instance.voxels.Keys);
+                    VoxelManager.instance.selectedVoxels.AddRange(VoxelManager.instance.voxels.Keys);
                 }
             }
             else

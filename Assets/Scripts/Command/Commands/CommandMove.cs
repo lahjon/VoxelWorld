@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandMove : ICommand
 {
-    Vector3Int[] coords;
+    List<Vector3Int> coords;
     Vector3Int offset;    
-    public CommandMove(Vector3Int[] coords, Vector3Int offset)
+    public CommandMove(List<Vector3Int> coords, Vector3Int offset)
     {
         this.coords = coords;
         this.offset = offset;    

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandAdd : ICommand
 {
-    Vector3Int[] coords;
-    Color color;
-    public CommandAdd(Vector3Int[] coords, Color color)
+    List<Vector3Int> coords;
+    float3 color;
+    public CommandAdd(List<Vector3Int> coords, float3 color)
     {
         this.coords = coords;
         this.color = color;

@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandDrawLine : ICommand
 {
-    Vector3Int[] coords;
-    Color color;
-    public CommandDrawLine(Vector3Int[] coords, Color color)
+    List<Vector3Int> coords;
+    float3 color;
+    public CommandDrawLine(List<Vector3Int> coords, float3 color)
     {
         this.coords = coords;
         this.color = color;

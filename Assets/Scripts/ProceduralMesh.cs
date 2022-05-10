@@ -13,12 +13,19 @@ public class ProceduralMesh : MonoBehaviour
 {
 	Mesh mesh;
 	MeshCollider meshCollider;
+	MeshRenderer meshRenderer;
 
 	void Awake () 
 	{
 		mesh = new Mesh { name = "Procedural Mesh"};
 		GetComponent<MeshFilter>().mesh = mesh;
+		meshRenderer = GetComponent<MeshRenderer>();
 		meshCollider = GetComponent<MeshCollider>();
+	}
+	public void SetMaterial(Material material)
+	{
+		Material newMat = Instantiate(material);
+		meshRenderer.material = newMat;
 	}
 	public void GenerateMesh(Face[] facesArr) 
 	{

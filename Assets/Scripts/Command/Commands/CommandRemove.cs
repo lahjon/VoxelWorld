@@ -5,9 +5,9 @@ using UnityEngine;
 
 public class CommandRemove : ICommand
 {
-    Vector3Int[] coords;
-    Color color;
-    public CommandRemove(Vector3Int[] coords, Color color)
+    List<Vector3Int> coords;
+    float3 color;
+    public CommandRemove(List<Vector3Int> coords, float3 color)
     {
         this.coords = coords;
         this.color = color;
