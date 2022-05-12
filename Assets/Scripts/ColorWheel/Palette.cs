@@ -9,7 +9,7 @@ public class Palette : MonoBehaviour
 
     void Awake()
     {
-        paletteCount = 6;
+        paletteCount = transform.childCount;
         paletts = new Button[paletteCount];
         for (int i = 0; i < transform.childCount; i++)
         {

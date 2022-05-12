@@ -16,12 +16,14 @@ public class VoxelManager : MonoBehaviour, ISaveable
 {
     public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
     public Dictionary<Vector3Int, Voxel> processingVoxels = new Dictionary<Vector3Int, Voxel>();
+    //public HashSet<Vector3Int> selection = new HashSet<Vector3Int>();
     public Material normalMaterial, transparentMaterial;
     List<List<Vector3Int>> Brushes = new List<List<Vector3Int>>();
     public PositionHandle positionHandle;
     public List<Vector3Int> selectedVoxels = new List<Vector3Int>();
-    public List<float3> paintVoxelsColor = new List<float3>();
-    public List<Vector3Int> paintVoxels = new List<Vector3Int>();
+    public Dictionary<Vector3Int, float3> paintedVoxels = new Dictionary<Vector3Int, float3>();
+    // public List<float3> paintVoxelsColor = new List<float3>();
+    // public List<Vector3Int> paintVoxels = new List<Vector3Int>();
     int _voxelSize = 1;
     public int VoxelSize
     {
@@ -29,10 +31,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
         set
         {
             _voxelSize = value;
-            bounds.min = Vector3Int.one * (-gridLevelMax / 2) / VoxelSize;
-            bounds.max = Vector3Int.one * (gridLevelMax / 2) / VoxelSize;
-
-            //new BoundsInt(Vector3Int.one * -14 / VoxelSize, Vector3Int.one * 14 / VoxelSize);
         }
     }
     public TMP_Text brushSizeText, voxelSizeText;
@@ -41,7 +39,22 @@ public class VoxelManager : MonoBehaviour, ISaveable
     
     bool NoKeys;
     int gridLevelLock;
-    bool _selectMode, _drawMode, _paintMode;
+    bool _transformMode, _drawMode, _paintMode, _selectMode;
+    public bool TransformMode
+    {
+        get => _transformMode;
+        set
+        {
+            _transformMode = value;
+            if (_transformMode)
+            {
+                DrawMode = false;
+                PaintMode = false;
+                SelectMode = false;
+            }
+            positionHandle.gameObject.SetActive(_transformMode);
+        }
+    }
     public bool SelectMode
     {
         get => _selectMode;
@@ -50,12 +63,13 @@ public class VoxelManager : MonoBehaviour, ISaveable
             _selectMode = value;
             if (_selectMode)
             {
-                DrawMode = false;
+                TransformMode = false;
                 PaintMode = false;
+                DrawMode = false;
             }
-            positionHandle.gameObject.SetActive(_selectMode);
         }
     }
+
     public bool DrawMode
     {
         get => _drawMode;
@@ -64,10 +78,11 @@ public class VoxelManager : MonoBehaviour, ISaveable
             _drawMode = value;
             if (_drawMode)
             {
-                SelectMode = false;
+                TransformMode = false;
                 PaintMode = false;
+                SelectMode = false;
             }
-            selectionCube.gameObject.SetActive(_drawMode);
+            //selectionCube.gameObject.SetActive(_drawMode);
         }
     }
 
@@ -79,8 +94,9 @@ public class VoxelManager : MonoBehaviour, ISaveable
             _paintMode = value;
             if (_paintMode)
             {
-                SelectMode = false;
+                TransformMode = false;
                 DrawMode = false;
+                SelectMode = false;
             }
         }
     }
@@ -98,7 +114,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             gridPlane.transform.localPosition = new Vector3(gridPlane.transform.localPosition.x, GridLevel + -10.01f, gridPlane.transform.localPosition.z);
         }
     }
-    public ProceduralMesh proceduralMesh, boundryMesh, processingMesh;
+    public ProceduralMesh proceduralMesh, boundryMesh, processingMesh, selectionMesh;
     public SelectionCube selectionCube;
     Vector3Int placementCoord; // the coord in which the next voxel will be placed
     Vector3Int selectedCoord; // the coord currently selected
@@ -107,16 +123,24 @@ public class VoxelManager : MonoBehaviour, ISaveable
     Vector3Int latestPlacementCoord; // used to draw lines
     Vector3Int latestSelectedCoord; // used to draw lines
     Vector3Int latestPaintCoord; // used to draw lines
+    Vector3Int startCoord; // used to draw lines
     Vector3Int placementNormal; // the normal direction of the latest placement
     Vector3Int lockedPlacementNormal; // the normal direction of the latest placement
     public static float3 color;    
+    public int[] gridBounds = new int[3]
+    {
+        1, 1, 1
+    };
+    bool isSelecting;
     public CommandManager commandManager;
     public CommandPanel commandPanel;
     public ValuePicker valuePicker;
     public ColorWheel colorWheel;
     public Palette palette;
+    public GameObject proceduralMeshPrefab, processingMeshPrefab, selectionMeshPrefab;
     public int brushSize;
     public Slider brushSlider, voxelSlider;
+    public TMP_Dropdown[] boundsDropdown;
     public static VoxelManager instance;
     #region standard
     void Awake()
@@ -126,21 +150,43 @@ public class VoxelManager : MonoBehaviour, ISaveable
             instance = this;
         }
         commandManager = new CommandManager(commandPanel);
+        proceduralMesh = Instantiate(proceduralMeshPrefab).GetComponent<ProceduralMesh>();
+        boundryMesh = Instantiate(proceduralMeshPrefab).GetComponent<ProceduralMesh>();
+        processingMesh = Instantiate(processingMeshPrefab).GetComponent<ProceduralMesh>();
+        selectionMesh = Instantiate(selectionMeshPrefab).GetComponent<ProceduralMesh>();
+        selectionMesh.gameObject.name = "selectionMesh";
+        processingMesh.gameObject.name = "processingMesh";
+        boundryMesh.gameObject.name = "boundryMesh";
+        proceduralMesh.gameObject.name = "proceduralMesh";
+    }
+
+
+
+    public void Duplicate()
+    {
+        // DEBUG
+        int amount = 50;
+        for (int i = 0; i < amount; i++)
+        {
+            ProceduralMesh aProceduralMesh = Instantiate(proceduralMeshPrefab).GetComponent<ProceduralMesh>();
+            aProceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
+            aProceduralMesh.transform.position = new Vector3(i*50, 0, 0);
+        }
     }
 
     void Start()
     {
         DrawMode = true;
-        SelectMode = false;
+        TransformMode = false;
         PaintMode = false;
-        bounds = new BoundsInt(Vector3Int.one * (-gridLevelMax / 2) / VoxelSize, Vector3Int.one * (gridLevelMax / 2) / VoxelSize);
+        bounds = new BoundsInt(Vector3Int.one * (-gridLevelMax / 2) / _voxelSize, Vector3Int.one * (gridLevelMax / 2) / _voxelSize);
         BuildBrushSizes();
     }
     void Update()
     {
+        SetCoordMouseHover();
         if (DrawMode && !EventSystem.current.IsPointerOverGameObject())
         {
-            SetCoordMouseHover();
 
             // MB0
             if (Input.GetMouseButtonDown(0))
@@ -219,7 +265,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         else if (PaintMode && !EventSystem.current.IsPointerOverGameObject())
         {
-            SetCoordMouseHover();
             if (Input.GetMouseButtonDown(0))
             {
 
@@ -230,9 +275,8 @@ public class VoxelManager : MonoBehaviour, ISaveable
             }
             if (Input.GetMouseButtonUp(0))
             {
-                commandManager.AddCommand(new CommandChangeColor(paintVoxels, color, paintVoxelsColor), false);
-                paintVoxels.Clear();
-                paintVoxelsColor.Clear();
+                commandManager.AddCommand(new CommandChangeColor(paintedVoxels.Keys.ToList(), color, paintedVoxels.Values.ToList()), false);
+                paintedVoxels.Clear();
             }
             // Keys
             if (Input.GetKeyDown(KeyCode.I))
@@ -248,7 +292,43 @@ public class VoxelManager : MonoBehaviour, ISaveable
                 TryFillColor();
             }
         }
+        else if (SelectMode && !EventSystem.current.IsPointerOverGameObject())
+        {
+            if (Input.GetMouseButtonDown(0))
+            {
+                isSelecting = true;
+                startCoord = selectedCoord;
+            }
+            if (Input.GetMouseButton(0))
+            {
+                if (selectedCoord != latestSelectedCoord)
+                {
+                    latestSelectedCoord = selectedCoord;
+                    
+                    Face[] faces = DragSelect(startCoord, latestSelectedCoord).Select(x => 
+                        new Face(DirectionStruct.INormals[placementNormal], new float3(selectedCoord.x, selectedCoord.y, selectedCoord.z), float3.zero)
+                    ).ToArray();
+                    selectionMesh.GenerateMesh(faces);
+                }
+            }
+            if (Input.GetMouseButtonUp(0))
+            {
+                selectionMesh.GenerateMesh(new Face[0]);
+                isSelecting = false;
+            }
+        }
     }
+
+    List<Vector3Int> DragSelect(Vector3Int start, Vector3Int end)
+    {
+        List<Vector3Int> selectedCoords = new List<Vector3Int>();
+        // for (int i = 0; i < length; i++)
+        // {
+            
+        // }
+        return selectedCoords;
+    }
+
     void CreateMesh()
     {   
         proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
@@ -266,6 +346,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #endregion
 
     #region button
+
+    public void ButtonInitialize()
+    {
+        voxels.Clear();
+        proceduralMesh.GenerateMesh(voxels.Values.SelectMany(x => x.GetFaces()).ToArray());
+        commandManager.ClearHistory();
+        VoxelSize = (int)voxelSlider.value;
+    }
+    public void UpdateDropdown(int index)
+    {
+        gridBounds[index] = boundsDropdown[index].value + 1;
+    }
     public void UpdateBrushSlider()
     {
         brushSize = (int)brushSlider.value;
@@ -273,7 +365,6 @@ public class VoxelManager : MonoBehaviour, ISaveable
     }
     public void UpdateVoxelSize()
     {
-        VoxelSize = (int)voxelSlider.value;
         voxelSizeText.text = ((int)voxelSlider.value).ToString();
     }
     public void ButtonClear()
@@ -437,17 +528,20 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         CreateMesh();
     }
-    public void SetVoxelsColor(List<Vector3Int> coords, float3 aColor)
+    public void SetVoxelsColor(List<Vector3Int> coords, float3 aColor, bool reset = false)
     {
         Voxel voxel;
         for (int i = 0; i < coords.Count; i++)
         {
-            if (voxels.TryGetValue(coords[i], out voxel))
+            if (voxels.TryGetValue(coords[i], out voxel) && !paintedVoxels.ContainsKey(voxel.coord))
             {
-                paintVoxelsColor.Add(voxel.color);
-                paintVoxels.Add(voxel.coord);
+                paintedVoxels.Add(voxel.coord, voxel.color);
                 voxel.color = aColor;
             }
+        }
+        if (reset)
+        {
+            paintedVoxels.Clear();
         }
         CreateMesh();
     }
@@ -900,21 +994,29 @@ public class VoxelManager : MonoBehaviour, ISaveable
                 selCoord.z = Mathf.RoundToInt(hit.point.z / VoxelSize) - offsetCoord.z;
             }
 
-            placementNormal = normal;
-            placementCoord = (selCoord + normal);
-            selectedCoord = selCoord ;
-            Debug.Log(selectedCoord);
-            Debug.Log(placementCoord);
+            if (selectedCoord != selCoord || placementNormal != normal)
+            {
+                placementNormal = normal;
+                selectedCoord = selCoord; 
+                placementCoord = (selCoord + normal);
+                if (!isSelecting)
+                {
+                    selectionMesh.GenerateMesh(new Face[1] {new Face(DirectionStruct.INormals[placementNormal], new float3(selectedCoord.x, selectedCoord.y, selectedCoord.z), float3.zero)});
+                }
+            }
         }
         else if (plane.Raycast(ray, out distance))
         {
             Vector3 pos = ray.GetPoint(distance);
             placementCoord = new Vector3Int(Mathf.FloorToInt(pos.x / VoxelSize), GridLevel, Mathf.FloorToInt(pos.z / VoxelSize));
-            selectedCoord = placementCoord;
-            placementNormal = Vector3Int.up;
+            if (selectedCoord != placementCoord)
+            {
+                selectedCoord = placementCoord;
+                placementNormal = Vector3Int.up;
+            }
         }
 
-        selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
+        //selectionCube.MoveToCoord(placementCoord, voxels.ContainsKey(placementCoord));
     }
     #endregion
 

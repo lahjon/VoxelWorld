@@ -67,16 +67,6 @@ namespace Geometry
 		};
     }
 }
-
-public enum Direction
-{
-	XPos,
-	YPos,
-	ZPos,
-	XNeg,
-	YNeg,
-	ZNeg
-}
 public struct DirectionStruct
 {
 	public static readonly Vector3Int[] Normals = new Vector3Int[6]
@@ -88,6 +78,27 @@ public struct DirectionStruct
 		Vector3Int.down,
 		Vector3Int.back
 	};
+
+	public static readonly Dictionary<Vector3Int, int> INormals = new Dictionary<Vector3Int, int>
+	{
+		{Vector3Int.right, 0},
+		{Vector3Int.up, 1},
+		{Vector3Int.forward, 2},
+		{Vector3Int.left, 3},
+		{Vector3Int.down, 4},
+		{Vector3Int.back, 5}
+	};
+
+
+	// public static readonly HashSet<Vector3Int> hNormals = new HashSet<Vector3Int>
+	// {
+	// 	Vector3Int.right,
+	// 	Vector3Int.up,
+	// 	Vector3Int.forward,
+	// 	Vector3Int.left,
+	// 	Vector3Int.down,
+	// 	Vector3Int.back
+	// };
 	// public static readonly Direction[] Directions = new Direction[6]
 	// {
 	// 	Direction.XPos,

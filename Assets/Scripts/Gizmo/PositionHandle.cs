@@ -84,7 +84,7 @@ public class PositionHandle : MonoBehaviour
     }
     void FixedUpdate()
     {
-        if (VoxelManager.instance.SelectMode)
+        if (VoxelManager.instance.TransformMode)
         {
             RaycastHit hit;
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
