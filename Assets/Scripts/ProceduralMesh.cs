@@ -43,4 +43,21 @@ public class ProceduralMesh : MonoBehaviour
 		mesh.RecalculateBounds();
 		meshCollider.sharedMesh = Instantiate<Mesh>(mesh);
 	}
+
+	public void GenerateMesh(Face face) 
+	{
+		Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
+		Mesh.MeshData meshData = meshDataArray[0];
+
+		NativeArray<Face> faces = new NativeArray<Face>(1, Allocator.TempJob);
+		faces[0] = face;
+
+		MeshJob<GenerateFaces, SingleStream>.ScheduleParallel(mesh, meshData, faces, default).Complete();
+
+		faces.Dispose();
+
+		Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh);
+		mesh.RecalculateBounds();
+		meshCollider.sharedMesh = Instantiate<Mesh>(mesh);
+	}
 }

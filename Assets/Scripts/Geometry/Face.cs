@@ -19,6 +19,15 @@ namespace Geometry
             this.direction = direction;
 			this.color = color;
         }
+		public Face(int direction, float3 position, float3 color, float size)
+        {
+            this.x = (FaceDirections[direction][0] + position) * size;
+            this.y = (FaceDirections[direction][1] + position) * size;
+            this.w = (FaceDirections[direction][2] + position) * size;
+            this.z = (FaceDirections[direction][3] + position) * size;
+            this.direction = direction;
+			this.color = color;
+        }
 		public static float3[][] FaceDirections = new float3[6][]
 		{
 			new float3[4]

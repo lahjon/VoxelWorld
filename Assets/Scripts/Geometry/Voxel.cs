@@ -55,6 +55,19 @@ namespace Geometry {
             }
             return faces;
         }
+        public List<Face> GetFaces(float size)
+        {
+            List<Face> faces = new List<Face>();
+            for (int i = 0; i < 6; i++)
+            {
+                if (neighbours[i] != null)
+                {
+                    continue;
+                }
+                faces.Add(new Face(i, new float3(coord.x, coord.y, coord.z), color, size));
+            }
+            return faces;
+        }
     }
 
 }

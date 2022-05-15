@@ -36,8 +36,8 @@ public class PositionHandle : MonoBehaviour
                 if (PositionHandleCollider != null)
                 {
                     PositionHandleCollider.Moving = true;
-                    VoxelManager.instance.selectedVoxels.Clear();
-                    VoxelManager.instance.selectedVoxels.AddRange(VoxelManager.instance.voxels.Keys);
+                    //VoxelManager.instance.selectedVoxels.Clear();
+                    //VoxelManager.instance.selectedVoxels.AddRange(VoxelManager.instance.voxels.Keys);
                 }
             }
             else
@@ -51,7 +51,7 @@ public class PositionHandle : MonoBehaviour
                     }
                 }
 
-                VoxelManager.instance.selectedVoxels.Clear();
+                //VoxelManager.instance.selectedVoxels.Clear();
                 Position = Vector3.zero;
                 Offset = Vector3Int.zero;
             }
