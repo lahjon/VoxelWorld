@@ -8800,6 +8800,7 @@ MonoBehaviour:
   proceduralMeshPrefab: {fileID: 8711423703847157339, guid: 5cf9bb0681b48fd43ab89bbea0cd56d4, type: 3}
   processingMeshPrefab: {fileID: 8711423703847157339, guid: 29a72cf62e571284c83de567b3e81f2e, type: 3}
   cursorMeshPrefab: {fileID: 8711423703847157339, guid: aa2ab76767ced1a4683656554fd897ec, type: 3}
+  boundryMeshPrefab: {fileID: 8711423703847157339, guid: 795927cc8ac2600439ea29dcfee0233b, type: 3}
   brushSize: 0
   brushSlider: {fileID: 171109401}
   voxelSlider: {fileID: 746347368}

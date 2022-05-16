@@ -19,12 +19,22 @@ namespace Geometry
             this.direction = direction;
 			this.color = color;
         }
-		public Face(int direction, float3 position, float3 color, float size)
+		public Face(int direction, float3 position, float3 color, float size, bool invert = true)
         {
-            this.x = (FaceDirections[direction][0] + position) * size;
-            this.y = (FaceDirections[direction][1] + position) * size;
-            this.w = (FaceDirections[direction][2] + position) * size;
-            this.z = (FaceDirections[direction][3] + position) * size;
+			if (invert)
+			{
+				this.x = (FaceDirections[direction][3] + position) * size;
+				this.y = (FaceDirections[direction][1] + position) * size;
+				this.w = (FaceDirections[direction][2] + position) * size;
+				this.z = (FaceDirections[direction][0] + position) * size;
+			}
+			else
+			{
+				this.x = (FaceDirections[direction][0] + position) * size;
+				this.y = (FaceDirections[direction][1] + position) * size;
+				this.w = (FaceDirections[direction][2] + position) * size;
+				this.z = (FaceDirections[direction][3] + position) * size;
+			}
             this.direction = direction;
 			this.color = color;
         }
