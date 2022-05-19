@@ -56,6 +56,11 @@ namespace UnityTemplateProjects
         
         CameraState m_TargetCameraState = new CameraState();
         CameraState m_InterpolatingCameraState = new CameraState();
+        public float minDistance = 1.0f;
+        public float maxDistance = 4.0f;
+        public float smooth = 10.0f;
+        Vector3 dollyDir;
+        float distance; 
 
         [Header("Movement Settings")]
         [Tooltip("Exponential boost factor on translation, controllable by mouse wheel.")]
@@ -83,6 +88,10 @@ namespace UnityTemplateProjects
 
         void Start()
         {
+
+            dollyDir = transform.localPosition.normalized;
+            distance = transform.localPosition.magnitude;
+
             var map = new InputActionMap("Simple Camera Controller");
 
             lookAction = map.AddAction("look", binding: "<Mouse>/delta");
@@ -161,7 +170,15 @@ namespace UnityTemplateProjects
         
         void Update()
         {
-            // Exit Sample  
+            // RaycastHit hit;
+            // if( Physics.Linecast( transform.position, (transform.position + transform.forward) * 2, out hit ) )
+            // {
+            //     Debug.Log("Hit");
+            // }
+            // else
+            // {
+            //     Debug.Log(" No Hit");
+            // }
 
             if (IsEscapePressed())
             {
@@ -207,10 +224,10 @@ namespace UnityTemplateProjects
             }
             
             // Modify movement by a boost factor (defined in Inspector and modified in play mode through the mouse scroll wheel)
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                boost += GetBoostFactor();
-            }
+            // if (Input.GetKey(KeyCode.LeftShift))
+            // {
+            //     boost += GetBoostFactor();
+            // }
             translation *= Mathf.Pow(2.0f, boost);
 
             m_TargetCameraState.Translate(translation);

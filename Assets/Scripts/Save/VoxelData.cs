@@ -4,6 +4,9 @@ using UnityEngine;
 public class SaveData
 {   
     public VoxelData[] voxelDatas;
+    
+    public BoundsInt bounds;
+    public int voxelSize;
     public string ToJson()
     {
         return JsonUtility.ToJson(this);

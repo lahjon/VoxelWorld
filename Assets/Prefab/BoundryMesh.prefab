@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8711423703847157317}
   - component: {fileID: 8711423703847157338}
   - component: {fileID: 8711423703847157318}
-  m_Layer: 8
+  m_Layer: 9
   m_Name: BoundryMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}

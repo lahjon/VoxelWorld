@@ -1,6 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
+[System.Serializable]
 public struct BoundsInt 
 {
     public BoundsInt(Vector3Int min, Vector3Int max)

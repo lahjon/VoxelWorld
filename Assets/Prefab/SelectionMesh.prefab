@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8711423703847157317}
   - component: {fileID: 8711423703847157338}
   - component: {fileID: 8711423703847157318}
-  m_Layer: 6
+  m_Layer: 8
   m_Name: SelectionMesh
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -62,7 +62,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8453712ad7598404693c70a0ca89c8cd, type: 2}
+  - {fileID: 2100000, guid: c8d50fb1ab0301d4394bdc7bd07dee51, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
