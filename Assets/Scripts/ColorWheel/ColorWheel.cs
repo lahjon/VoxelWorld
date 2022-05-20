@@ -6,6 +6,7 @@ using UnityEngine.UI;
 using System.Collections;
 using Unity.Mathematics;
 using System;
+using UnityEngine.InputSystem;
 
 public class ColorWheel : MonoBehaviour
 {
@@ -46,7 +47,7 @@ public class ColorWheel : MonoBehaviour
 
     void InBoundry()
     {
-        picker.position = Input.mousePosition;
+        picker.position = Mouse.current.position.ReadValue();
         (float r, float deg) = XY2Polar((int)picker.localPosition.x, (int)picker.localPosition.y);
 
         if (r > radius) picker.localPosition = ClosestPointOnCircle(picker.localPosition);
