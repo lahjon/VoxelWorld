@@ -692,14 +692,6 @@
       <Project>{1b94074b-ec1c-67e6-7706-a21aef12c08c}</Project>
       <Name>Autodesk.Fbx</Name>
     </ProjectReference>
-    <ProjectReference Include="Unity.Recorder.Editor.csproj">
-      <Project>{0a4261d0-8957-f359-6991-f8a9d5c5d042}</Project>
-      <Name>Unity.Recorder.Editor</Name>
-    </ProjectReference>
-    <ProjectReference Include="Unity.Recorder.csproj">
-      <Project>{ca1a50ee-1403-28f8-8ca1-2d3d0b31b3a5}</Project>
-      <Name>Unity.Recorder</Name>
-    </ProjectReference>
     <ProjectReference Include="UnityEditor.UI.csproj">
       <Project>{37a62d20-e7c0-5d59-ebde-6bafba91c6a8}</Project>
       <Name>UnityEditor.UI</Name>

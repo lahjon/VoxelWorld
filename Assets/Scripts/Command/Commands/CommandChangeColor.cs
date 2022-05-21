@@ -20,7 +20,7 @@ public class CommandChangeColor : ICommand
 
     public void Execute()
     {
-        VoxelManager.instance.SetVoxelsColor(coords, newColor, true);
+        VoxelManager.instance.SetVoxelsColor(coords, newColor);
     }
 
     public void Undo()

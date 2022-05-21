@@ -20,6 +20,8 @@ public class BuilderController : MonoBehaviour
     public float boostMultiplier = 2f;
     public float mouseSensitivityFactor = 1.5f;
     public float speed = 50f;
+    bool CanPlace => voxelManager.canPlace && !EventSystem.current.IsPointerOverGameObject();
+    bool actionInProgress;
     CameraState targetCameraState = new CameraState();
     CameraState interpolatingCameraState = new CameraState();
     VoxelManager voxelManager;
@@ -49,6 +51,11 @@ public class BuilderController : MonoBehaviour
                     buildCommandStart = voxelManager.PerformDrawLine;
                     buildCommandInProgess = null;
                     buildCommandEnd = null;
+                    break;
+                case BuildCommand.InteractiveDrawLine:
+                    buildCommandStart = voxelManager.StartInteractiveDrawLine;
+                    buildCommandInProgess = voxelManager.PerformInteractiveDrawLine;
+                    buildCommandEnd = voxelManager.StopInteractiveDrawLine;
                     break;
                 case BuildCommand.RemoveLine:
                     buildCommandStart = voxelManager.PerformRemoveLine;
@@ -126,14 +133,36 @@ public class BuilderController : MonoBehaviour
 
     void PrimaryActionPressed(InputAction.CallbackContext context)
     {
-        isLMBPressed = true;
-        buildCommandStart?.Invoke();
+        if (CanPlace)
+        {
+            isLMBPressed = true;
+            actionInProgress = true;
+            buildCommandStart?.Invoke();
+        }
     }
     void PrimaryActionHeld()
     {
-        buildCommandInProgess?.Invoke();
+        if (EventSystem.current.IsPointerOverGameObject()) 
+        {
+            PrimaryActionReleased();
+            actionInProgress = false;
+            buildCommandEnd?.Invoke();
+        }
+
+        buildCommandInProgess?.Invoke();   
+        
     }
     void PrimaryActionReleased(InputAction.CallbackContext context)
+    {
+        if (actionInProgress)
+        {
+            buildCommandEnd?.Invoke();
+            actionInProgress = false;
+        }
+
+        isLMBPressed = false;
+    }
+    void PrimaryActionReleased()
     {
         isLMBPressed = false;
         buildCommandEnd?.Invoke();
@@ -177,10 +206,14 @@ public class BuilderController : MonoBehaviour
             Rotate();
             Cursor.lockState = CursorLockMode.Locked;
         }
-        if (isLMBPressed)
+
+        if (actionInProgress)
         {
             PrimaryActionHeld();
         }
+
+        
+
         Vector3 translation = isShiftPressed ? currentMovement * Time.deltaTime * speed * boostMultiplier : currentMovement * speed * Time.deltaTime;
 
         float positionLerpPct = 1f - Mathf.Exp((Mathf.Log(1f - 0.99f) / positionLerpTime) * Time.deltaTime);
@@ -216,6 +249,7 @@ public enum BuildCommand
     Add,
     Erase,
     DrawLine,
+    InteractiveDrawLine,
     RemoveLine,
     Extrude,
     PullIn,

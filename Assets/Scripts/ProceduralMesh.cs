@@ -14,6 +14,7 @@ public class ProceduralMesh : MonoBehaviour
 	Mesh mesh;
 	MeshCollider meshCollider;
 	MeshRenderer meshRenderer;
+	//public bool isEmpty => mesh.vertices.Length < 1;
 
 	void Awake () 
 	{
