@@ -9241,8 +9241,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectedCoord: {x: 0, y: 0, z: 0}
-  startCoord: {x: 0, y: 0, z: 0}
+  updateCoord: {x: 0, y: 0, z: 0}
   deltaCoord: {x: 0, y: 0, z: 0}
+  startCoord: {x: 0, y: 0, z: 0}
+  test: {fileID: 0}
 --- !u!4 &1145972139
 Transform:
   m_ObjectHideFlags: 0
@@ -9527,7 +9529,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1152849307}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.58837616, y: 1.0643823, z: -0.22120154}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1145972139}

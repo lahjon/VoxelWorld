@@ -28,6 +28,7 @@ public class BuilderController : MonoBehaviour
     public System.Action buildCommandStart;
     public System.Action buildCommandInProgess;
     public System.Action buildCommandEnd;
+    public System.Action swapCallback;
     BuildCommand _buildCommand;
     public BuildCommand BuildCommand
     {
@@ -35,6 +36,7 @@ public class BuilderController : MonoBehaviour
         set
         {
             _buildCommand = value;
+            swapCallback?.Invoke();
             switch (_buildCommand)
             {
                 case BuildCommand.Add:
@@ -102,6 +104,14 @@ public class BuilderController : MonoBehaviour
                     buildCommandInProgess = voxelManager.PerformBoxDragSelect;
                     buildCommandEnd = voxelManager.StopBoxDragSelect;
                     break;
+                case BuildCommand.Move:
+                    voxelManager.selectionController.gameObject.SetActive(true);
+                    buildCommandStart = voxelManager.selectionController.StartMove;
+                    buildCommandInProgess = voxelManager.selectionController.PerformMove;
+                    buildCommandEnd = voxelManager.selectionController.StopMove;
+                    swapCallback = () => voxelManager.selectionController.gameObject.SetActive(false);
+                    break;
+
                 default:
                     buildCommandStart = null;
                     buildCommandInProgess = null;

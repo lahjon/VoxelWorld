@@ -677,6 +677,18 @@ public class VoxelManager : MonoBehaviour, ISaveable
 
         }
     }
+    public void TryAddVoxels(List<Vector3Int> coords, List<float3> color)
+    {
+        latestSelectedCoord = selectedCoord;
+        if (latestAddedCoord != selectedCoord)
+        {
+            latestAddedCoord = placementCoord;
+            latestPlacementCoord = placementCoord;
+
+            VoxelManager.instance.AddVoxels(coords, color);
+
+        }
+    }
     public void PerformExtrude()
     {
         if (voxels.ContainsKey(selectedCoord))

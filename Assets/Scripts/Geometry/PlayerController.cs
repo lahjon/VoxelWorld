@@ -11,7 +11,7 @@ public class PlayerController : MonoBehaviour
     bool isMovementPressed;
     float rotationFactorPerFrame = 1;
     float allowPlayerRotation = 0.1f;
-    float desiredRotationSpeed = 0.1f;
+    //float desiredRotationSpeed = 0.1f;
     float startAnimTime = 0.3f;
     float stopAnimTime = 0.15f;
     float speed;
