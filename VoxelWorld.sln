@@ -93,6 +93,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.Mathematics.Editor", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Autodesk.Fbx.Editor", "Autodesk.Fbx.Editor.csproj", "{2d342c9b-c412-a436-f529-85337d955cb7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assembly-CSharp-Editor", "Assembly-CSharp-Editor.csproj", "{5d6a2ab5-04a5-4589-9382-d011e97713f3}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Unity.ShaderGraph.Utilities", "Unity.ShaderGraph.Utilities.csproj", "{7a128060-bb16-96b4-157a-9a44e07204d9}"
 EndProject
 Global
@@ -192,6 +194,8 @@ Global
 		{65c6520a-a0d6-0fd3-5c90-0e4c76e6a70d}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2d342c9b-c412-a436-f529-85337d955cb7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2d342c9b-c412-a436-f529-85337d955cb7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5d6a2ab5-04a5-4589-9382-d011e97713f3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5d6a2ab5-04a5-4589-9382-d011e97713f3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7a128060-bb16-96b4-157a-9a44e07204d9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7a128060-bb16-96b4-157a-9a44e07204d9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection

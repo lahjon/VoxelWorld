@@ -106,10 +106,13 @@ public class BuilderController : MonoBehaviour
                     break;
                 case BuildCommand.Move:
                     voxelManager.selectionController.gameObject.SetActive(true);
-                    buildCommandStart = voxelManager.selectionController.StartMove;
-                    buildCommandInProgess = voxelManager.selectionController.PerformMove;
-                    buildCommandEnd = voxelManager.selectionController.StopMove;
-                    swapCallback = () => voxelManager.selectionController.gameObject.SetActive(false);
+                    //buildCommandStart = voxelManager.selectionController.StartMove;
+                    //buildCommandInProgess = voxelManager.selectionController.PerformMove;
+                    //buildCommandEnd = voxelManager.selectionController.StopMove;
+                    buildCommandStart = null;
+                    buildCommandInProgess = null;
+                    buildCommandEnd = null;
+                    //swapCallback = () => voxelManager.selectionController.gameObject.SetActive(false);
                     break;
 
                 default:

@@ -665,7 +665,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             AddProcessingVoxels(GetBrush(placementCoord), color);
         }
     }
-    void TryAddVoxels(List<Vector3Int> coords)
+    public void TryAddVoxels(List<Vector3Int> coords)
     {
         latestSelectedCoord = selectedCoord;
         if (latestAddedCoord != selectedCoord)
@@ -677,17 +677,21 @@ public class VoxelManager : MonoBehaviour, ISaveable
 
         }
     }
-    public void TryAddVoxels(List<Vector3Int> coords, List<float3> color)
+    public void TryAddVoxels(List<Vector3Int> coords, List<float3> color, bool fromStart = false)
     {
         latestSelectedCoord = selectedCoord;
-        if (latestAddedCoord != selectedCoord)
+        if (fromStart)
+        {
+            VoxelManager.instance.AddVoxels(coords, color);
+        }
+        else if (latestAddedCoord != selectedCoord)
         {
             latestAddedCoord = placementCoord;
             latestPlacementCoord = placementCoord;
 
             VoxelManager.instance.AddVoxels(coords, color);
-
         }
+
     }
     public void PerformExtrude()
     {
