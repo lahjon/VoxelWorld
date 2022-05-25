@@ -41,7 +41,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public TMP_Text brushSizeText, voxelSizeText;
     public GameObject gridPlane;
     public LayerMask lmv, lmg, lmvg, lme;
-    LayerMask aLm;
+    public LayerMask aLm;
     
     bool NoKeys;
     int gridLevelLock;
@@ -123,7 +123,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public ProceduralMesh proceduralMesh, boundryMesh, boundryVisMesh, processingMesh, cursorMesh, subtractProcessingMesh, selectionMesh;
     public SelectionCube selectionCube;
     Vector3Int placementCoord; // the coord in which the next voxel will be placed
-    Vector3Int selectedCoord; // the coord currently selected
+    public Vector3Int selectedCoord; // the coord currently selected
     Vector3Int? latestAddedCoord = null; // used to stop drawing when holding down mb
     Vector3Int latestPlacementCoord; // used to draw lines
     Vector3Int latestSelectedCoord; // used to draw lines
@@ -1134,12 +1134,9 @@ public class VoxelManager : MonoBehaviour, ISaveable
     #region coords
     void SetCoordMouseHover()
     {
-        Plane plane = new Plane(Vector3.up, GridLevel);
-        //float distance;
         Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-        
         RaycastHit hit;
-        
+
 
         if (Physics.Raycast(ray, out hit, Mathf.Infinity, aLm))
         {

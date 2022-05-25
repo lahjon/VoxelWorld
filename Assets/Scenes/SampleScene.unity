@@ -3753,6 +3753,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: TextureCreator
       objectReference: {fileID: 0}
+    - target: {fileID: 2954957093195370241, guid: 5c9896c2c89982348a7b92ff7c2937b4, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2954957093195370301, guid: 5c9896c2c89982348a7b92ff7c2937b4, type: 3}
       propertyPath: m_RootOrder
       value: 12
@@ -9375,7 +9379,14 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   selectedCoord: {x: 0, y: 0, z: 0}
   startCoord: {x: 0, y: 0, z: 0}
+  previousCoord: {x: 0, y: 0, z: 0}
   deltaCoord: {x: 0, y: 0, z: 0}
+  placementDirection: {x: 0, y: 0, z: 0}
+  placementNormal: {x: 0, y: 0, z: 0}
+  offsetSensitivity: 20
+  lm:
+    serializedVersion: 2
+    m_Bits: 64
 --- !u!4 &1145972139
 Transform:
   m_ObjectHideFlags: 0
@@ -9612,7 +9623,7 @@ MonoBehaviour:
   gridPlane: {fileID: 1975817280}
   lmv:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   lmg:
     serializedVersion: 2
     m_Bits: 512
@@ -9622,6 +9633,9 @@ MonoBehaviour:
   lme:
     serializedVersion: 2
     m_Bits: 2147483647
+  aLm:
+    serializedVersion: 2
+    m_Bits: 0
   gridLevelMax: 80
   proceduralMesh: {fileID: 0}
   boundryMesh: {fileID: 0}
@@ -9631,6 +9645,7 @@ MonoBehaviour:
   subtractProcessingMesh: {fileID: 0}
   selectionMesh: {fileID: 0}
   selectionCube: {fileID: 1497558411}
+  selectedCoord: {x: 0, y: 0, z: 0}
   placementNormal: {x: 0, y: 0, z: 0}
   gridBounds: 010000000100000001000000
   commandPanel: {fileID: 631785976}
