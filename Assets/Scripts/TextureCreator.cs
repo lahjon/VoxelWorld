@@ -40,10 +40,11 @@ public class TextureCreator : MonoBehaviour {
 	}
 
 	private void Update () {
-		if (transform.hasChanged) {
+		if (transform.hasChanged) 
+		{
 			transform.hasChanged = false;
 			Debug.Log("Clear");
-			VoxelManager.instance.ButtonClear();
+			VoxelWorldManager.instance.Clear();
 			FillTexture();
 		}
 	}
@@ -83,7 +84,7 @@ public class TextureCreator : MonoBehaviour {
 				}
 			}
 		}
-		VoxelManager.instance.TryAddVoxels(coords, colors, true);
+		VoxelWorldManager.instance.CreateWorld(coords, colors);
 		texture.Apply();
 	}
 }

@@ -1,9 +1,23 @@
 using Unity.Mathematics;
+using UnityEngine;
+using UnityEditor;
+using System.Collections.Generic;
+using Unity.Collections;
 
 
-public struct Vertex {
-	public float3 position, normal;
-	public float4 tangent; //, color;
-	public float3 color;
-	public float2 texCoord0;
+namespace Geometry 
+{
+	public class VoxelChunk : MonoBehaviour
+	{
+		public Dictionary<Vector3Int, Voxel> voxels = new Dictionary<Vector3Int, Voxel>();
+		public List<VoxelChunk> neighbours = new List<VoxelChunk>();
+		public Vector3Int coord;
+		public ProceduralMesh mesh;
+		public void Init(Vector3Int aCoord)
+		{
+			coord = aCoord;
+			Debug.Log(coord);
+		}
+	}
+
 }

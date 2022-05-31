@@ -29,7 +29,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
     public Dictionary<Vector3Int, float3> paintedVoxels = new Dictionary<Vector3Int, float3>();
     public SelectionController selectionController;
     int _voxelSize = 1;
-    int[] voxelSizes = new int[6] {2,4,8,10,16,20};
+    int[] voxelSizes = new int[6] {1,2,4,8,10,16};
     public int VoxelSize
     {
         get => voxelSizes[_voxelSize - 1];
@@ -185,6 +185,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         PaintMode = false;
         SelectMode = false;
         BuildBrushSizes();
+        //BuildSphericalBrushSizes();
         ButtonInitialize();
         CreateDropdown();
     }
@@ -612,7 +613,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         if (!processingVoxels.ContainsKey(selectedCoord))
         {
             List<Vector3Int> brush = GetBrush(selectedCoord, -1);
-            VoxelManager.instance.AddProcessingVoxels(brush);
+            VoxelManager.instance.AddSubtractProcessingVoxels(brush);
             VoxelManager.instance.RemoveVoxels(brush);
         }
     }
@@ -673,7 +674,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
             latestAddedCoord = placementCoord;
             latestPlacementCoord = placementCoord;
 
-            VoxelManager.instance.AddProcessingVoxels(coords, color);
+            AddProcessingVoxels(coords, color);
 
         }
     }
@@ -682,17 +683,19 @@ public class VoxelManager : MonoBehaviour, ISaveable
         latestSelectedCoord = selectedCoord;
         if (fromStart)
         {
-            VoxelManager.instance.AddVoxels(coords, color);
+            AddVoxels(coords, color);
         }
         else if (latestAddedCoord != selectedCoord)
         {
             latestAddedCoord = placementCoord;
             latestPlacementCoord = placementCoord;
 
-            VoxelManager.instance.AddVoxels(coords, color);
+            AddVoxels(coords, color);
         }
-
     }
+
+
+
     public void PerformExtrude()
     {
         if (voxels.ContainsKey(selectedCoord))
@@ -757,6 +760,7 @@ public class VoxelManager : MonoBehaviour, ISaveable
         }
         CreateMesh();
     }
+
     Voxel AddVoxel(Vector3Int coord, float3 aColor)
     {
         if (!voxels.ContainsKey(coord) && InBounds(coord))
@@ -1033,6 +1037,24 @@ public class VoxelManager : MonoBehaviour, ISaveable
             brush.Clear();
         }
     }
+
+    // void BuildSphericalBrushSizes()
+    // {
+    //     // create a voxel sphere
+    //     for (int x = -5; x < 5; x++)
+    //     {
+    //         for (int y = -5; y < 5; y++)
+    //         {
+    //             for (int z = -5; z < 5; z++)
+    //             {
+    //                 if (x * x + y * y + z * z < 25)
+    //                 {
+    //                     AddVoxel(new Vector3Int(x, y, z));
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 
     List<Vector3Int> SelectOutByNormal(Voxel voxel, Vector3Int direction)
     {
